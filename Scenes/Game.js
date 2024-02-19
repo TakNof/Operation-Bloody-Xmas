@@ -12,10 +12,10 @@ class Game extends Phaser.Scene{
         this.playerAnimations = [
             {name: "Dead", animationParams: {end: 17, framerate: 15}},
             {name: "Idle", animationParams: {end: 16, framerate: 15}},
-            {name: "Jump", animationParams: {end: 16, framerate: 15}},
-            {name: "Run", animationParams: {end: 11, framerate: 15}},
+            {name: "Jump", animationParams: {end: 16, framerate: 25}},
+            {name: "Run", animationParams: {end: 11, framerate: 30}},
             {name: "Slide", animationParams: {end: 11, framerate: 15}},
-            {name: "Walk", animationParams: {end: 13, framerate: 13, repeat: -1}}
+            {name: "Walk", animationParams: {end: 13, framerate: 30, repeat: -1}}
         ];
 
         for(let animation of this.playerAnimations){
@@ -27,18 +27,31 @@ class Game extends Phaser.Scene{
     create(){
         this.grid = this.add.grid(0, 0, canvasSize.width*2, canvasSize.height*2, 32, 32, 0x00b9f2).setAltFillStyle(0x016fce).setOutlineStyle();
 
+        
+        const PineSword = {
+            name: "PineSword",
+            type: "Melee",
+            soundDir: "",
+            spriteDir: "./assets/Player/Weapons/Pine Sword/Pine Sword.png"
+        }
+
+        const weapons = [PineSword];
+                
         this.walls = new WallsBuilder(this, "wall", 32, 20, true, true);
         this.walls.createWalls();
 
-        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height/2}, "player", {x: 80, y: 128}, 200, 100);
+        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height/2}, "player", {x: 80, y: 128}, 200, 2, 100);
         this.player.setSpriteAnimations(this.playerAnimations);
+        this.player.setStateMachine("Idle", ["Idle", "Jump", "Run", "Slide", "Walk", "Dead"]);
+        // this.player.setStateMachine("Idle", ["Idle"]);
+        
+        console.log(this.player);
+        console.log(this.player.getStateMachine());
 
         this.walls.setColliders(this.player);
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
-        this.cameras.main.startFollow(this.player);
-
-        console.log(this)
+        this.cameras.main.startFollow(this.player);        
     }
 
     update(time, delta){

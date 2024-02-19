@@ -10,12 +10,14 @@ class Player extends Living{
     * @param {{x: Number, y: Number}} originInfo A literal Object with the initial positioning information for the sprite.
     * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
     * @param {Number} size The size of the sprite in pixels.
-    * @param {Number} defaultVelocity The default velocity for the living sprite.
+    * @param {Number} defaultVelocity The default velocity for the Living sprite.
+    * @param {Number} velocityMultiplier The runing velocity of the Player.
     * @param {Number} maxHealth The maximum health of the player.
     * 
     */
-    constructor(scene, originInfo, playerImgStr, size, defaultVelocity, maxHealth){
+    constructor(scene, originInfo, playerImgStr, size, defaultVelocity, velocityMultiplier, maxHealth){
         super(scene, originInfo, playerImgStr, size, defaultVelocity);
+        this.velocityMultiplier = velocityMultiplier;
 
         this.controls = this.getScene().input.keyboard.createCursorKeys();
 
@@ -313,10 +315,11 @@ class Player extends Living{
         // }
     }
 
+
     jump(){
         if(this.controls.space.isDown && this.body.onFloor()){
-            this.setVelocityY(-600);
             this.play(this.getSpriteAnimations("Jump").getAnimationName(), true);
+            this.setVelocityY(-600);
         }
     }
 
@@ -337,28 +340,28 @@ class Player extends Living{
      * Allow the player to switch among the weapons.
      */
     switchWeapons(){
-        if(this.controls.shift.isDown){
-            let time = this.getScene().time.now;
-            if (time - this.lastSwitchWeaponTimer  > this.getCurrentWeapon().switchWeaponDelay) {
-                this.getCurrentWeapon().playSwitchWeaponSound();
+        // if(this.controls.shift.isDown){
+        //     let time = this.getScene().time.now;
+        //     if (time - this.lastSwitchWeaponTimer  > this.getCurrentWeapon().switchWeaponDelay) {
+        //         this.getCurrentWeapon().playSwitchWeaponSound();
 
-                this.getCurrentWeapon().setVisible(false);
+        //         this.getCurrentWeapon().setVisible(false);
 
-                let index = this.weapons.indexOf(this.getCurrentWeapon());
+        //         let index = this.weapons.indexOf(this.getCurrentWeapon());
 
-                if(index == this.weapons.length - 1){
-                    this.setCurrentWeapon(this.weapons[0]);
-                }else{
-                    this.setCurrentWeapon(this.weapons[index + 1]);
-                }
+        //         if(index == this.weapons.length - 1){
+        //             this.setCurrentWeapon(this.weapons[0]);
+        //         }else{
+        //             this.setCurrentWeapon(this.weapons[index + 1]);
+        //         }
 
-                this.getCurrentWeapon().setVisible(true);
+        //         this.getCurrentWeapon().setVisible(true);
 
-                this.lastShotTimer = 0;
-                this.lastSwitchWeaponTimer = time;
+        //         this.lastShotTimer = 0;
+        //         this.lastSwitchWeaponTimer = time;
 
-                this.getHUD().setHUDElementValue("ammo", this.getCurrentWeapon().getProjectiles().countActive(false), false);
-            }
-        }
+        //         this.getHUD().setHUDElementValue("ammo", this.getCurrentWeapon().getProjectiles().countActive(false), false);
+        //     }
+        // }
     }
 }

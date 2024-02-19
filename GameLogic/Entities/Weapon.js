@@ -2,17 +2,13 @@ class Weapon extends Sprite{
     /**
     * The constructor of Weapons Class.
     * @constructor
-    * @param {Phaser.Scene} scene The scene of the game to place bullets.
-    * @param {Phaser.Scene} scene3D The current scene of the game to place the weapon sprite.
+    * @param {Phaser.Scene} scene The current scene of the game to place the weapon sprite.
     * @param {{x: Number, y: Number, angleOffset: Number}} originInfo  A list with the initial positioning information for the weapon sprite.
-    * @param {String} weapon spriteImgStr An str of the image name given in the preload method of the main class.
-    * @param {Number} depth The depth of rendering of the weapon sprite.
-    * @param {{damage: Number, velocity: Number, delay: Number, critical: Number}} bulletProperties 
-    * The damage per bullet, the projectile velocity and the delay in seconds between the shots for the weapon sprite. 
-    * @param {{min: Number, max: Number}} distanceLimits The minimum and maximum distance to deal damage concidering the distance to the object.    *  
+    * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
+    * @param {Object} config The specific configuration of the weapon
     */
-    constructor(scene, originInfo, spriteImgStr, depth, bulletProperties, distanceLimits, animationParams){
-        super(scene, originInfo, spriteImgStr, depth);
+    constructor(scene, originInfo, spriteImgStr, config){
+        super(scene, originInfo, spriteImgStr);
 
         this.bulletProperties = bulletProperties;
         this.distanceLimits = distanceLimits;

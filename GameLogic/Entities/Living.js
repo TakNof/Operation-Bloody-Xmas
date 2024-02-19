@@ -16,6 +16,8 @@ class Living extends Sprite{
     constructor(scene, originInfo, spriteImgStr, size, defaultVelocity){
         super(scene, originInfo, spriteImgStr);
 
+        this.name = spriteImgStr;
+
         this.defaultVelocity = defaultVelocity;
 
         scene.physics.add.existing(this, false);
@@ -27,6 +29,8 @@ class Living extends Sprite{
         this.isAlive = true;
 
         this.ableToShoot = true;
+
+        this.currentState = null;
     }
 
     /**
@@ -48,6 +52,25 @@ class Living extends Sprite{
      */
     getSize(){
         return this.size;
+    }
+
+    /**
+     * Creates the state machine for the Living Sprite
+     * @param {String} initialState 
+     * @param {Array<String>} possibleStatesStr
+     */
+    setStateMachine(initialState, possibleStatesStr){
+        let possibleStates = {};
+
+        for(let state of possibleStatesStr){
+            possibleStates.state = new State(`${state}`);
+        }
+
+        this.stateMachine = new StateMachine(initialState, possibleStates, [this.getScene(), this]);
+    }
+
+    getStateMachine(){
+        return this.stateMachine;
     }
 
     /**
@@ -177,7 +200,6 @@ class Living extends Sprite{
             this.animations[animation.name] = new SpriteAnimation(this.getScene(), `${this.getSpriteImgStr()}_${animation.name}`);
             this.animations[animation.name].setAnimationFrames(animation.animationParams.end, animation.animationParams.framerate, animation.animationParams.repeat);
         }
-
     }
 
     getSpriteAnimations(element){
