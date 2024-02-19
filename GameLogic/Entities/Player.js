@@ -37,21 +37,6 @@ class Player extends Living{
     }
 
     /**
-     * Sets the graphicator object of the player.
-     */
-    setGraphicator(){
-        this.graphicator = new Graphicator(this.getScene3D(), this.getSize(), options.quality.value);
-    }
-
-    /**
-     * Gets the graphicator object of the player.
-     * @returns {Graphicator}
-     */
-    getGraphicator(){
-        return this.graphicator;
-    }
-
-    /**
      * Sets the HUD object of the player.
      * @param {Object} canvasSize
      */
