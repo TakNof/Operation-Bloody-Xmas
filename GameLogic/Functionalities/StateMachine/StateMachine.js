@@ -24,6 +24,7 @@ class StateMachine {
 
     transition(newState, ...enterArgs) {
         this.state = newState;
+        console.log(this.state);
         this.possibleStates[this.state].enter(...this.stateArgs, ...enterArgs);
     }
 }

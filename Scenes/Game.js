@@ -42,11 +42,13 @@ class Game extends Phaser.Scene{
 
         this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height/2}, "player", {x: 80, y: 128}, 200, 2, 100);
         this.player.setSpriteAnimations(this.playerAnimations);
-        this.player.setStateMachine("Idle", ["Idle", "Jump", "Run", "Slide", "Walk", "Dead"]);
+        this.player.setStateMachine("Idle", ["Idle", "Walk", "Jump", "Run", "Slide", "Dead"]);
+    
         // this.player.setStateMachine("Idle", ["Idle"]);
         
         console.log(this.player);
         console.log(this.player.getStateMachine());
+        this.player.settingStates();
 
         this.walls.setColliders(this.player);
 

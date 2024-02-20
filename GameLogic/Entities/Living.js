@@ -63,7 +63,7 @@ class Living extends Sprite{
         let possibleStates = {};
 
         for(let state of possibleStatesStr){
-            possibleStates.state = new State(`${state}`);
+            possibleStates[state] = new State(`${state}`);
         }
 
         this.stateMachine = new StateMachine(initialState, possibleStates, [this.getScene(), this]);

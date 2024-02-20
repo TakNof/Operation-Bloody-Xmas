@@ -25,7 +25,7 @@ class Player extends Living{
             this.controls[key.toLowerCase()] = this.getScene().input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[key.toUpperCase()]);
         }
 
-        this.setBounce(0.2);
+        this.setBounce(0.1);
 
         this.setMaxHealth(maxHealth);
 
@@ -254,10 +254,11 @@ class Player extends Living{
     }
 
     update(){
-        this.move();
-        this.jump();
-        this.shoot();
-        this.switchWeapons();
+        // this.move();
+        // this.jump();
+        // this.shoot();
+        // this.switchWeapons();
+        this.getStateMachine().step();
     }
 
     /**
@@ -268,29 +269,6 @@ class Player extends Living{
         if(this.getVelocityX() == 0 && this.getVelocityY() == 0){
             this.play(this.getSpriteAnimations("Idle").getAnimationName(), true);
         }
-
-        if(this.getDebug() === true){
-
-        }     
-    
-        if((this.controls.up.isDown ^ this.controls.down.isDown) ^ (this.controls.w.isDown ^ this.controls.s.isDown)){
-            if (this.controls.up.isDown || this.controls.w.isDown){
-                //Here we use the velocity calculated, and we change its sign accordingly to the direction of movement.
-                // this.setVelocityX(this.getXcomponent());
-                // this.setVelocityY(this.getYcomponent()); 
-
-            }else if(this.controls.down.isDown || this.controls.s.isDown){    
-                // this.setVelocityX(-this.getXcomponent());
-                // this.setVelocityY(-this.getYcomponent());
-            }
-
-            if(this.getDebug() === true){
-                // for(let ray of this.getSpriteRays().rays){
-                //     ray.body.setVelocityX(this.getVelocityX());
-                //     ray.body.setVelocityY(this.getVelocityY());
-                // }
-            }
-        } 
 
         if((this.controls.left.isDown ^ this.controls.right.isDown) ^ (this.controls.a.isDown ^ this.controls.d.isDown)){
             if(this.body.onFloor()){
@@ -307,12 +285,8 @@ class Player extends Living{
             }
         }else if(this.body.onFloor()){
             this.setVelocityX(0);
-            this.play(this.getSpriteAnimations("Idle").getAnimationName());
+            this.play(this.getSpriteAnimations("Idle").getAnimationName(), true);
         }
-
-        // if(this.getDebug() === true){
-        //     this.getSpriteRays().setInitialRayAngleOffset(this.getOriginInfo().angleOffset);
-        // }
     }
 
 
@@ -363,5 +337,56 @@ class Player extends Living{
         //         this.getHUD().setHUDElementValue("ammo", this.getCurrentWeapon().getProjectiles().countActive(false), false);
         //     }
         // }
+    }
+
+    settingStates(){
+        this.getStateMachine().possibleStates["Idle"].execute = function execute(scene = this.getScene(), player = this) {
+            if((player.controls.left.isDown ^ player.controls.right.isDown) ^ (player.controls.a.isDown ^ player.controls.d.isDown)) {
+                player.stateMachine.transition('Walk');
+            }else if(player.body.onFloor()){
+                if(player.controls.space.isDown){
+                    player.stateMachine.transition('Jump');
+                }else{
+                    player.setVelocityX(0);
+                    player.play(player.getSpriteAnimations("Idle").getAnimationName(), true);
+                }
+            }
+        }
+
+        this.getStateMachine().possibleStates["Walk"].execute = function execute(scene = this.getScene(), player = this) {                    
+            if((player.controls.left.isDown ^ player.controls.right.isDown) ^ (player.controls.a.isDown ^ player.controls.d.isDown)){
+                if(player.body.onFloor()){
+                    if(player.controls.space.isDown){
+                        player.stateMachine.transition('Jump');
+                    }else{
+                        player.play(player.getSpriteAnimations("Walk").getAnimationName(), true);
+                    }
+                }
+    
+                if(player.controls.left.isDown || player.controls.a.isDown){
+                    player.setVelocityX(-player.defaultVelocity);
+                    player.flipX= true;
+    
+                }else if(player.controls.right.isDown || player.controls.d.isDown){
+                    player.setVelocityX(player.defaultVelocity);
+                    player.flipX= false;
+                }
+            }else{
+                player.stateMachine.transition('Idle');
+            }
+        }
+
+        this.getStateMachine().possibleStates["Jump"].enter = function enter(scene = this.getScene(), player = this) {     
+            player.setVelocityY(-600);
+            player.play(player.getSpriteAnimations("Jump").getAnimationName(), true);
+
+            if(!(player.controls.left.isDown ^ player.controls.right.isDown) ^ (player.controls.a.isDown ^ player.controls.d.isDown)) {
+                console.log("Transitioning to Idle");
+                player.stateMachine.transition('Idle');
+            }else{
+                console.log("Transitioning to Walk");
+                player.stateMachine.transition("Walk");
+            }   
+        }
     }
 }
