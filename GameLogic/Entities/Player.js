@@ -379,14 +379,7 @@ class Player extends Living{
         this.getStateMachine().possibleStates["Jump"].enter = function enter(scene = this.getScene(), player = this) {     
             player.setVelocityY(-600);
             player.play(player.getSpriteAnimations("Jump").getAnimationName(), true);
-
-            if(!(player.controls.left.isDown ^ player.controls.right.isDown) ^ (player.controls.a.isDown ^ player.controls.d.isDown)) {
-                console.log("Transitioning to Idle");
-                player.stateMachine.transition('Idle');
-            }else{
-                console.log("Transitioning to Walk");
-                player.stateMachine.transition("Walk");
-            }   
+            player.stateMachine.transition("Walk");
         }
     }
 }
