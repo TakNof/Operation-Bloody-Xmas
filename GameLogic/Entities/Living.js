@@ -29,8 +29,6 @@ class Living extends Sprite{
         this.isAlive = true;
 
         this.ableToShoot = true;
-
-        this.currentState = null;
     }
 
     /**
@@ -48,7 +46,7 @@ class Living extends Sprite{
 
     /**
      * Gets the size of the sprite.
-     * @return {number}
+     * @return {Number}
      */
     getSize(){
         return this.size;
@@ -56,36 +54,27 @@ class Living extends Sprite{
 
     /**
      * Creates the state machine for the Living Sprite
-     * @param {String} initialState 
-     * @param {Array<String>} possibleStatesStr
-     */
-    setStateMachine(initialState, Str){
-        let possibleStates = {};
-
-        for(let state of possibleStatesStr){
-            possibleStates[state] = new State(`${state}`);
-        }
-
-        this.stateMachine = new StateMachine(initialState, possibleStates, [this.getScene(), this]);
-    }
-
-    /**
-     * Creates the state machine for the Living Sprite
      * @param {Array<String>} possibleStates
      */
-    setStateMachineV2(possibleStates){
+    setStateMachine(){
         let possibleStatesMap = new Map();
 
-        for(let state of possibleStates){
+        for(let state of arguments){
             possibleStatesMap.set(state);
         }
 
         let className = `${this.constructor.name}StateMachine`;
-        let classConstructor = this.__checkClassConstructor(className, "StateMachineV2");
+        let classConstructor = this.__checkClassConstructor(className, "StateMachine");
 
         this.stateMachine = new classConstructor(this, possibleStatesMap);
     }
 
+    /**
+     * This method allows to call any desired class, as long as it exists.
+     * @param {String} className 
+     * @param {String} classParent 
+     * @returns {class}
+     */
     __checkClassConstructor(className, classParent){
         const classConstructor = eval(className);
         const classParentConstructor = eval(classParent);
@@ -96,7 +85,7 @@ class Living extends Sprite{
         }else if (classConstructor) {
             return classConstructor;
         } else {
-            throw new Error(`La clase "${className}" no está definida o no es una subclase de "${classParent}".`);
+            throw new Error(`The class "${className}" isn't defined or itn't an instanse of "${classParent}".`);
         }
     }
 
@@ -122,7 +111,7 @@ class Living extends Sprite{
 
     /**
      * Gets the velocity in the X component of the living sprite.
-     * @returns {number}
+     * @returns {Number}
      */
     getVelocityX(){
         return this.body.velocity.x;
@@ -130,7 +119,7 @@ class Living extends Sprite{
 
     /**
      * Gets the velocity in the Y component of the living sprite.
-     * @returns {number}
+     * @returns {Number}
      */
     getVelocityY(){
         return this.body.velocity.y;
@@ -138,7 +127,7 @@ class Living extends Sprite{
 
     /**
      * Sets the velocity in both axis of the living sprite.
-     * @param {number} value
+     * @param {Number} value
      */
     setVelocity(value){
         this.setVelocityX(value);
@@ -146,8 +135,16 @@ class Living extends Sprite{
     }
 
     /**
+     * Gets the velocity in both components of the living sprite.
+     * @returns {{Number, Number}}
+     */
+    getVelocity(){
+        return {x : this.getVelocityX(), y : this.getVelocityY()}
+    }
+
+    /**
      * Gets the default velocity of the living sprite.
-     * @returns {number}
+     * @returns {Number}
      */
     getDefaultVelocity(){
         return this.defaultVelocity;

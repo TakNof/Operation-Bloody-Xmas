@@ -48,11 +48,6 @@ let options = {
 
 const game = new Phaser.Game(config);
 
-if(game.config.physics.arcade.debug){
-    game.config.height *= 2;
-}
-
-
 /**
  * This method allows us to get a number between the specified range.
  * @param {number} min 

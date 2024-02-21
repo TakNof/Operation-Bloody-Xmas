@@ -63,18 +63,13 @@ class Player extends Living{
         this.weapons = new Array(weapons.length);
 
         for(let [i, weapon] of weapons.entries()){
-            this.weapons[i] = new Weapon(
-                this.getScene3D(),
-                {x: canvasSize.width/2, y: canvasSize.height*0.9},
-                weapon.name,
-                1000,
-                weapon.bulletProperties,
-                weapon.distanceLimits,
-                weapon.animationParams
-            )
-            this.weapons[i].setProjectiles(this.getScene());
+            let weaponClass = this.__checkClassConstructor(`${weapon.type}Weapon`, "Weapon");
+            this.weapons[i] = new weaponClass(this.getScene(), {x: 0, y: 0}, weapon.name, weapon.config);
             this.weapons[i].setVisible(false);
+            // this.addChild(weapon);
         }
+        console.log(this);
+
         this.setCurrentWeapon(this.weapons[0]);        
     }
 
@@ -254,133 +249,6 @@ class Player extends Living{
     }
 
     update(){
-        // this.move();
-        // this.jump();
-        // this.shoot();
-        // this.switchWeapons();
-        // this.getStateMachine().step();
         this.getStateMachine().update();
-    }
-
-    /**
-     * This method allows the player to have the basic controls of movement according to the stablished parameters.
-     * The movement only works through the key arrows.
-     */
-    move(){
-        if(this.getVelocityX() == 0 && this.getVelocityY() == 0){
-            this.play(this.getSpriteAnimations("Idle").getAnimationName(), true);
-        }
-
-        if((this.controls.left.isDown ^ this.controls.right.isDown) ^ (this.controls.a.isDown ^ this.controls.d.isDown)){
-            if(this.body.onFloor()){
-                this.play(this.getSpriteAnimations("Walk").getAnimationName(), true);
-            }
-
-            if (this.controls.left.isDown || this.controls.a.isDown){
-                this.setVelocityX(-this.defaultVelocity);
-                this.flipX= true;
-
-            }else if(this.controls.right.isDown || this.controls.d.isDown){
-                this.setVelocityX(this.defaultVelocity);
-                this.flipX= false;
-            }
-        }else if(this.body.onFloor()){
-            this.setVelocityX(0);
-            this.play(this.getSpriteAnimations("Idle").getAnimationName(), true);
-        }
-    }
-
-
-    jump(){
-        if(this.controls.space.isDown && this.body.onFloor()){
-            this.play(this.getSpriteAnimations("Jump").getAnimationName(), true);
-            this.setVelocityY(-600);
-        }
-    }
-
-    shoot(){
-        // if(this.controls.space.isDown){
-        //     let time = this.getScene().time.now;
-
-        //     if (time - this.lastShotTimer > this.getCurrentWeapon().getDelayBetweenShots()) {
-        //         this.getCurrentWeapon().shootProjectile(this, this.getCurrentWeapon().getBulletVelocity());
-        //         this.getHUD().setHUDElementValue("ammo", this.getCurrentWeapon().getProjectiles().countActive(false), false);
-
-        //         this.lastShotTimer = time;
-        //     }
-        // }
-    }
-
-    /**
-     * Allow the player to switch among the weapons.
-     */
-    switchWeapons(){
-        // if(this.controls.shift.isDown){
-        //     let time = this.getScene().time.now;
-        //     if (time - this.lastSwitchWeaponTimer  > this.getCurrentWeapon().switchWeaponDelay) {
-        //         this.getCurrentWeapon().playSwitchWeaponSound();
-
-        //         this.getCurrentWeapon().setVisible(false);
-
-        //         let index = this.weapons.indexOf(this.getCurrentWeapon());
-
-        //         if(index == this.weapons.length - 1){
-        //             this.setCurrentWeapon(this.weapons[0]);
-        //         }else{
-        //             this.setCurrentWeapon(this.weapons[index + 1]);
-        //         }
-
-        //         this.getCurrentWeapon().setVisible(true);
-
-        //         this.lastShotTimer = 0;
-        //         this.lastSwitchWeaponTimer = time;
-
-        //         this.getHUD().setHUDElementValue("ammo", this.getCurrentWeapon().getProjectiles().countActive(false), false);
-        //     }
-        // }
-    }
-
-    settingStates(){
-        this.getStateMachine().possibleStates["Idle"].execute = function execute(scene = this.getScene(), player = this) {
-            if((player.controls.left.isDown ^ player.controls.right.isDown) ^ (player.controls.a.isDown ^ player.controls.d.isDown)) {
-                player.stateMachine.transition('Walk');
-            }else if(player.body.onFloor()){
-                if(player.controls.space.isDown){
-                    player.stateMachine.transition('Jump');
-                }else{
-                    player.setVelocityX(0);
-                    player.play(player.getSpriteAnimations("Idle").getAnimationName(), true);
-                }
-            }
-        }
-
-        this.getStateMachine().possibleStates["Walk"].execute = function execute(scene = this.getScene(), player = this) {                    
-            if((player.controls.left.isDown ^ player.controls.right.isDown) ^ (player.controls.a.isDown ^ player.controls.d.isDown)){
-                if(player.body.onFloor()){
-                    if(player.controls.space.isDown){
-                        player.stateMachine.transition('Jump');
-                    }else{
-                        player.play(player.getSpriteAnimations("Walk").getAnimationName(), true);
-                    }
-                }
-    
-                if(player.controls.left.isDown || player.controls.a.isDown){
-                    player.setVelocityX(-player.defaultVelocity);
-                    player.flipX= true;
-    
-                }else if(player.controls.right.isDown || player.controls.d.isDown){
-                    player.setVelocityX(player.defaultVelocity);
-                    player.flipX= false;
-                }
-            }else{
-                player.stateMachine.transition('Idle');
-            }
-        }
-
-        this.getStateMachine().possibleStates["Jump"].enter = function enter(scene = this.getScene(), player = this) {     
-            player.setVelocityY(-600);
-            player.play(player.getSpriteAnimations("Jump").getAnimationName(), true);
-            player.stateMachine.transition("Walk");
-        }
     }
 }

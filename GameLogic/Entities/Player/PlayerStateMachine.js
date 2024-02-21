@@ -1,4 +1,4 @@
-class PlayerStateMachine extends StateMachineV2{
+class PlayerStateMachine extends StateMachine{
     /**
      * @param {Object} contextObject The object which will provide the context for the player states.
      * @param {{Object: String}} states An object containing the states of the State Machine Player.

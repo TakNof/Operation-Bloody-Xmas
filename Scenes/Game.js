@@ -22,12 +22,7 @@ class Game extends Phaser.Scene{
             let route = `./assets/Player/Animations/${animation.name}/${animation.name}`;
             this.load.atlas(`player_${animation.name}`, `${route}.png`, `${route}.json`);
         }
-    }
 
-    create(){
-        this.grid = this.add.grid(0, 0, canvasSize.width*2, canvasSize.height*2, 32, 32, 0x00b9f2).setAltFillStyle(0x016fce).setOutlineStyle();
-
-        
         const PineSword = {
             name: "PineSword",
             type: "Melee",
@@ -35,25 +30,29 @@ class Game extends Phaser.Scene{
             spriteDir: "./assets/Player/Weapons/Pine Sword/Pine Sword.png"
         }
 
-        const weapons = [PineSword];
+        this.weapons = [PineSword];
+
+        for(let weapon of this.weapons){
+            this.load.image(weapon.name, weapon.spriteDir);
+        }
+    }
+
+    create(){
+        this.grid = this.add.grid(0, 0, canvasSize.width*2, canvasSize.height*2, 32, 32, 0x00b9f2).setAltFillStyle(0x016fce).setOutlineStyle();
                 
         this.walls = new WallsBuilder(this, "wall", 32, 20, true, true);
         this.walls.createWalls();
 
         this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height/2}, "player", {x: 80, y: 128}, 200, 2, 100);
+        this.player.setWeapons(this.weapons);
         this.player.setSpriteAnimations(this.playerAnimations);
-
-        // this.player.setStateMachine("Idle", ["Idle", "Walk", "Jump", "Run", "Slide", "Dead"]);      
-        // console.log(this.player);
-        // console.log(this.player.getStateMachine());
-        // this.player.settingStates();
-
-        this.player.setStateMachineV2(["Idle", "Walk", "Jump", "Run", "Slide", "Dead"]);
+        this.player.setStateMachine("Idle", "Walk", "Jump", "Run", "Slide", "Dead");
 
         this.walls.setColliders(this.player);
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
-        this.cameras.main.startFollow(this.player);        
+        this.cameras.main.startFollow(this.player);
+        this.physics.world.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
     }
 
     update(time, delta){

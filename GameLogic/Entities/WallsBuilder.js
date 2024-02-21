@@ -23,7 +23,7 @@ class WallsBuilder{
         this.generateWalls = generateWalls;
         this.generateRandomWalls = generateRandomWalls;
 
-        this.wallNumberRatio = {x: parseInt(canvasSize.width/this.blockSize), y: parseInt(canvasSize.height/this.blockSize)};
+        this.wallNumberRatio = {x: parseInt(canvasSize.width*2/this.blockSize), y: parseInt(canvasSize.height*2/this.blockSize)};
     }
 
     createWalls(){
