@@ -258,7 +258,8 @@ class Player extends Living{
         // this.jump();
         // this.shoot();
         // this.switchWeapons();
-        this.getStateMachine().step();
+        // this.getStateMachine().step();
+        this.getStateMachine().update();
     }
 
     /**

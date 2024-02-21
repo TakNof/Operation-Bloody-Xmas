@@ -59,7 +59,7 @@ class Living extends Sprite{
      * @param {String} initialState 
      * @param {Array<String>} possibleStatesStr
      */
-    setStateMachine(initialState, possibleStatesStr){
+    setStateMachine(initialState, Str){
         let possibleStates = {};
 
         for(let state of possibleStatesStr){
@@ -67,6 +67,37 @@ class Living extends Sprite{
         }
 
         this.stateMachine = new StateMachine(initialState, possibleStates, [this.getScene(), this]);
+    }
+
+    /**
+     * Creates the state machine for the Living Sprite
+     * @param {Array<String>} possibleStates
+     */
+    setStateMachineV2(possibleStates){
+        let possibleStatesMap = new Map();
+
+        for(let state of possibleStates){
+            possibleStatesMap.set(state);
+        }
+
+        let className = `${this.constructor.name}StateMachine`;
+        let classConstructor = this.__checkClassConstructor(className, "StateMachineV2");
+
+        this.stateMachine = new classConstructor(this, possibleStatesMap);
+    }
+
+    __checkClassConstructor(className, classParent){
+        const classConstructor = eval(className);
+        const classParentConstructor = eval(classParent);
+        if (classParentConstructor) {
+            if (classConstructor && classConstructor.prototype instanceof classParentConstructor) {
+                return classConstructor;
+            }
+        }else if (classConstructor) {
+            return classConstructor;
+        } else {
+            throw new Error(`La clase "${className}" no está definida o no es una subclase de "${classParent}".`);
+        }
     }
 
     getStateMachine(){
