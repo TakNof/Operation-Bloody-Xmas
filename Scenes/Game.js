@@ -10,12 +10,12 @@ class Game extends Phaser.Scene{
         this.load.image("player", "./assets/Player/Sprites/Idle.png");
 
         this.playerAnimations = [
-            {name: "Dead", animationParams: {end: 17, framerate: 15}},
             {name: "Idle", animationParams: {end: 16, framerate: 15}},
+            {name: "Walk", animationParams: {end: 13, framerate: 30, repeat: -1}},
+            {name: "Run", animationParams: {end: 11, framerate: 30, repeat: -1}},
             {name: "Jump", animationParams: {end: 16, framerate: 25}},
-            {name: "Run", animationParams: {end: 11, framerate: 30}},
             {name: "Slide", animationParams: {end: 11, framerate: 15}},
-            {name: "Walk", animationParams: {end: 13, framerate: 30, repeat: -1}}
+            {name: "Dead", animationParams: {end: 17, framerate: 15}}
         ];
 
         for(let animation of this.playerAnimations){
@@ -26,6 +26,11 @@ class Game extends Phaser.Scene{
         const PineSword = {
             name: "PineSword",
             type: "Melee",
+            position: {x: 30, y: 10, angleOffset: Math.PI/4},
+            size: {x: 54, y: 54},
+            config: {
+                originPosition: {x: 0.5, y: 1}
+            },
             soundDir: "",
             spriteDir: "./assets/Player/Weapons/Pine Sword/Pine Sword.png"
         }
@@ -34,6 +39,22 @@ class Game extends Phaser.Scene{
 
         for(let weapon of this.weapons){
             this.load.image(weapon.name, weapon.spriteDir);
+        }
+
+        this.load.image("skeleton", "/assets/Enemy/Skeleton/Sprites/Idle.png");
+
+        this.skeletonAnimations = [
+            {name: "Idle", animationParams: {end: 4, framerate: 10}},
+            {name: "Walk", animationParams: {end: 4, framerate: 30, repeat: -1}},
+            {name: "Attack", animationParams: {end: 8, framerate: 30}},
+            {name: "Blocking", animationParams: {end: 4, framerate: 15}},
+            {name: "Damaged", animationParams: {end: 4, framerate: 15}},
+            {name: "Dead", animationParams: {end: 4, framerate: 15}}
+        ];
+
+        for(let animation of this.skeletonAnimations){
+            let route = `./assets/Enemy/Skeleton/Animations/${animation.name}/${animation.name}`;
+            this.load.atlas(`skeleton_${animation.name}`, `${route}.png`, `${route}.json`);
         }
     }
 
@@ -46,9 +67,16 @@ class Game extends Phaser.Scene{
         this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height/2}, "player", {x: 80, y: 128}, 200, 2, 100);
         this.player.setWeapons(this.weapons);
         this.player.setSpriteAnimations(this.playerAnimations);
-        this.player.setStateMachine("Idle", "Walk", "Jump", "Run", "Slide", "Dead");
+        this.player.setStateMachine("Idle", "Walk", "Jump", "Run", "Slide", "Attack", "Dead");
+    
+        this.skeleton = new Skeleton(this, {x: 500, y: 600}, "skeleton", {x: 20, y: 48}, 100, 300, {});
+        this.skeleton.setSpriteAnimations(this.skeletonAnimations);
+        this.skeleton.setStateMachine("Idle", "Walk", "Attack", "Blocking", "Damaged", "Dead");
+        this.skeleton.setScale(2, 2);
 
-        this.walls.setColliders(this.player);
+        console.log(this.skeleton);
+
+        this.walls.setColliders(this.player, this.skeleton);
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
         this.cameras.main.startFollow(this.player);
@@ -57,5 +85,6 @@ class Game extends Phaser.Scene{
 
     update(time, delta){
         this.player.update();
+        this.skeleton.update();
     }
 }

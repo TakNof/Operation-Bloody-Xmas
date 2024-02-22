@@ -43,7 +43,7 @@ class StateMachine{
 
         this.cleanStatesHistory();
 
-        console.log(this.statesHistory);
+        // console.log(this.statesHistory);
     }
 
     addStateToHistory(){

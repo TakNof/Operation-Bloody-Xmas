@@ -12,23 +12,12 @@ class Enemy extends Living{
     * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
     * @param {Number} size The size of the sprite in pixels.
     * @param {Number} defaultVelocity The default velocity for the living sprite.
-    * @param {Number} chaseDistance The distance where the player can be detect the player.
+    * @param {Number} chaseDistance The distance where the player can be detected by the enemy.
     */
-    constructor(scene, enemyOriginInfo, spriteImgStr, size, defaultVelocity, chaseDistance){
-        super(scene, enemyOriginInfo, spriteImgStr, size, defaultVelocity);
-
-        this.setEnemy3D(this.getSpriteImgStr().replace("small_", ""));
-
-        this.setXcomponent();
-        this.setYcomponent();
-
-        this.setProjectiles();
+    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity, chaseDistance){
+        super(scene, originInfo, spriteImgStr, size, defaultVelocity);
 
         this.setChaseDistance(chaseDistance);
-
-        this.inSight = false;
-
-        this.creationTime = this.getScene().time.now;
     }
 
     /**
@@ -61,53 +50,6 @@ class Enemy extends Living{
      */
     getDistanceToPlayer(){
         return this.distanceToPlayer;
-    }
-
-    /**
-     * Sets the group of projectiles of the enemy.
-     */
-    setProjectiles(){
-        let amount = 5;
-        this.enemyProjectiles = new ProjectileGroup(this.getScene(), "small_energy_bomb", amount);
-    }
-
-    /**
-     * Gets the enemy projectiles.
-     */
-    getProjectiles2D(){
-        return this.enemyProjectiles;
-    }
-
-    /**
-     * Sets the projectile properties of the enemy.
-     * @param {{damage: Number, velocity: Number, delay: Number, critical: Number}} bulletProperties
-     */
-    setBulletProperties(bulletProperties){
-        this.bulletProperties = bulletProperties;
-    }
-
-    /**
-     * Gets the projectile properties of the enemy.
-     * @return {{damage: Number, velocity: Number, delay: Number, critical: Number}}
-     */
-    getBulletProperties(){
-        return this.bulletProperties;
-    }
-
-    /**
-     * Sets the projectile effective distances of the enemy.
-     * @param {{min: Number, max: Number}} distanceLimits
-     */
-    setDistanceLimits(distanceLimits){
-        this.distanceLimits = distanceLimits;
-    }
-
-    /**
-     * Gets the projectile effective distances of the enemy.
-     * @return {{min: Number, max: Number}}
-     */
-    getDistanceLimits(){
-        return this.distanceLimits;
     }
 
     /**
@@ -196,24 +138,6 @@ class Enemy extends Living{
     }
 
     /**
-     * Sets the animations of the enemy.
-     * @param {Array<String>} animationsArray 
-     */
-    setAnimations(animationsArray){
-        this.animations = {};
-
-        for(let animation of animationsArray){
-            this.animations[animation.name] = new SpriteAnimation(this.getScene3D(), `${this.getEnemy3D().getSpriteImgStr()}_${animation.name}`);
-            this.animations[animation.name].setAnimationFrames(animation.animationParams.end, animation.animationParams.framerate, animation.animationParams.repeat);
-        }
-
-    }
-
-    getAnimations(element){
-        return this.animations[element];
-    }
-
-    /**
      * This method allows the enemy to have the basic controls of movement according to the stablished parameters.
      */
     move(playerPosition){
@@ -275,6 +199,10 @@ class Enemy extends Living{
                 }, 300)
             }
         }
+    }
+
+    update(){
+        this.getStateMachine().update();
     }
 }
 

@@ -7,8 +7,8 @@ class RangeWeapon extends Weapon{
      * @param {*} spriteImgStr 
      * @param {*} config 
      */
-    constructor(scene, originInfo, spriteImgStr, config){
-        super(scene, originInfo, spriteImgStr, config);
+    constructor(scene, originInfo, spriteImgStr, size, config){
+        super(scene, originInfo, spriteImgStr, size, config);
     }
 
         /**

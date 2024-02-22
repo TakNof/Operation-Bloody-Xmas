@@ -39,23 +39,6 @@ class Player extends Living{
     }
 
     /**
-     * Sets the HUD object of the player.
-     * @param {Object} canvasSize
-     */
-    setHUD(enemies = undefined){
-        this.hud = new HUD(this.scene3D, enemies);
-        this.hud.setHUDElementValue("health", this.getHealth(), true, "%");
-    }
-
-    /**
-     * Gets the HUD object of the player.
-     * @returns {HUD}
-     */
-    getHUD(){
-        return this.hud;
-    }
-
-    /**
      * Sets the list of weapons of the player.
      * @param {Array<Object>} weapons
      */
@@ -64,11 +47,10 @@ class Player extends Living{
 
         for(let [i, weapon] of weapons.entries()){
             let weaponClass = this.__checkClassConstructor(`${weapon.type}Weapon`, "Weapon");
-            this.weapons[i] = new weaponClass(this.getScene(), {x: 0, y: 0}, weapon.name, weapon.config);
+            this.weapons[i] = new weaponClass(this.getScene(), weapon.position, weapon.name, weapon.size, weapon.config);
             this.weapons[i].setVisible(false);
-            // this.addChild(weapon);
+            this.addChild(this.weapons[i]);
         }
-        console.log(this);
 
         this.setCurrentWeapon(this.weapons[0]);        
     }
