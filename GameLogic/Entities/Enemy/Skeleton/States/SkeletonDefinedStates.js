@@ -8,10 +8,22 @@ class SkeletonIdleState extends EnemyState{
         super(enemy, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.enemy.setVelocityX(0);
+        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+
+        this.timeout = setTimeout(() =>{
+            this.enemy.getStateMachine().transitionToState("Patrol");
+        
+        }, getRndInteger(2, 3)*1000)
+    }
 
     updateState(){
-        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+        this.enemy.setVelocityX(0);
+        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
+            clearTimeout(this.timeout);
+            this.enemy.getStateMachine().transitionToState("Chase");
+        }
     }
 
     exitState(){}
@@ -39,7 +51,7 @@ class SkeletonIdleState extends EnemyState{
     onTriggerExit(other){}
 }
 
-class SkeletonWalkState extends EnemyState{
+class SkeletonPatrolState extends EnemyState{
     /**
      * 
      * @param {Enemy} enemy The object which will provide the context for the enemy states.
@@ -49,35 +61,28 @@ class SkeletonWalkState extends EnemyState{
         super(enemy, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+        this.enemy.setVelocityX(-this.enemy.defaultVelocity);
+        this.enemy.flipX = true;
 
-    updateState(){
-        const {a, d, left, right, shift, space} = this.enemy.controls;
-
-        if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown)){
-            this.enemy.stateMachine.transitionToState('Idle');
-        }
-
-        if(this.enemy.body.onFloor()){
-            if(space.isDown){
-                this.enemy.stateMachine.transitionToState('Jump');
-            }else if(shift.isDown){
-                this.enemy.stateMachine.transitionToState("Run");
-            }else{
-                this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
-            }
-        }
-
-        if(left.isDown || a.isDown){
-            this.enemy.setVelocityX(-this.enemy.defaultVelocity);
-            this.enemy.flipX = true;
-
-        }else if(right.isDown || d.isDown){
+        this.firstTimeout = setTimeout(() =>{
             this.enemy.setVelocityX(this.enemy.defaultVelocity);
             this.enemy.flipX = false;
-        }
+            
+            this.secondTimeout = setTimeout(() =>{
+                this.enemy.stateMachine.transitionToState("Idle");                    
+            }, getRndInteger(2, 3)*1000)
+        }, getRndInteger(2, 3)*1000)
+    }
 
-        this.updateChildren();
+    updateState(){
+        this.enemy.onWallFound();
+        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
+            clearTimeout(this.firstTimeout);
+            clearTimeout(this.secondTimeout);
+            this.enemy.getStateMachine().transitionToState("Chase");
+        }
     }
 
     exitState(){}
@@ -105,7 +110,7 @@ class SkeletonWalkState extends EnemyState{
     onTriggerExit(other){}
 }
 
-class SkeletonRunState extends EnemyState{
+class SkeletonChaseState extends EnemyState{
     /**
      * 
      * @param {Enemy} enemy The object which will provide the context for the enemy states.
@@ -118,34 +123,21 @@ class SkeletonRunState extends EnemyState{
     enterState(){}
 
     updateState(){
-        const {a, s, d, left, down, right, shift, space} = this.enemy.controls;
+        const {player} = this.enemy.getScene();
 
-        if(this.enemy.body.onFloor()){
-            if(space.isDown){
-                this.enemy.stateMachine.transitionToState('Jump');
-            }else if(down.isDown ^ s.isDown){
-                this.enemy.stateMachine.transitionToState("Slide");
-            }else{
-                this.enemy.play(this.enemy.getSpriteAnimations("Run").getAnimationName(), true);
-            }
+        this.enemy.onWallFound();
+        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.attackDistance){
+            this.enemy.getStateMachine().transitionToState("Attack");
+        }else if(this.enemy.getDistanceToPlayer() >= this.enemy.config.chaseDistance){
+            this.enemy.lastPlayerSeenPosition = player.getPosition();
+            this.enemy.getStateMachine().transitionToState("Search");
+        }else{
+            this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+            this.enemy.flipX = player.getPositionX() < this.enemy.getPositionX();
+            let sign = this.enemy.flipX ? -1: 1;
+
+            this.enemy.setVelocityX(sign*this.enemy.defaultVelocity);
         }
-
-        if(left.isDown || a.isDown){
-            this.enemy.setVelocityX(-this.enemy.defaultVelocity*this.enemy.velocityMultiplier);
-            this.enemy.flipX= true;
-
-        }else if(right.isDown || d.isDown){
-            this.enemy.setVelocityX(this.enemy.defaultVelocity*this.enemy.velocityMultiplier);
-            this.enemy.flipX= false;
-        }
-        
-        if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
-            this.enemy.stateMachine.transitionToState('Walk');
-        }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown)){
-            this.enemy.stateMachine.transitionToState('Idle');
-        }
-
-        this.updateChildren();
     }
 
     exitState(){}
@@ -173,7 +165,128 @@ class SkeletonRunState extends EnemyState{
     onTriggerExit(other){}
 }
 
-class SkeletonJumpState extends EnemyState{
+class SkeletonSearchState extends EnemyState{
+    /**
+     * 
+     * @param {Enemy} enemy The object which will provide the context for the enemy states.
+     * @param {Object} key
+     */
+    constructor(enemy, key){
+        super(enemy, key);
+    }
+
+    enterState(){}
+
+    updateState(){
+        this.enemy.onWallFound();
+        this.reachedPlayerLastSeenPosition = false;
+
+        if(Math.abs(this.enemy.lastPlayerSeenPosition.x - this.enemy.getPositionX()) <= 10 && this.enemy.getDistanceToPlayer() > this.enemy.config.chaseDistance){
+            this.reachedPlayerLastSeenPosition = true;
+
+            this.enemy.setVelocityX(0);
+            this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+            if(!this.interval){
+                this.interval = setInterval(() =>{
+                    this.enemy.flipX = !this.enemy.flipX;
+                }, 2000);
+
+                this.timeout = setTimeout(() =>{
+                    clearInterval(this.interval);
+                    this.enemy.getStateMachine().transitionToState("Patrol");
+                }, getRndInteger(4, 6)*1000)
+            }
+        }else if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
+            clearInterval(this.interval);
+            clearTimeout(this.timeout);
+            this.enemy.getStateMachine().transitionToState("Chase");
+            
+
+        }else if(!this.reachedPlayerLastSeenPosition){
+            this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+            this.enemy.flipX = this.enemy.lastPlayerSeenPosition.x < this.enemy.getPositionX();
+            let sign = this.enemy.flipX ? -1: 1;
+
+            this.enemy.setVelocityX(sign*this.enemy.defaultVelocity);
+        }
+    }
+
+    exitState(){}
+
+    getNextState(){
+        return this.stateKey;
+    }
+
+    /**
+     * 
+     * @param {Object} other The object which has entered the trigger. 
+     */
+    onTriggerEnter(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which is staying the trigger. 
+     */
+    onTriggerStay(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which has exited the trigger. 
+     */
+    onTriggerExit(other){}
+}
+
+class SkeletonAttackState extends EnemyState{
+    /**
+     * 
+     * @param {Enemy} enemy The object which will provide the context for the enemy states.
+     * @param {Object} key
+     */
+    constructor(enemy, key){
+        super(enemy, key);
+    }
+
+    enterState(){
+        const {scene} = this.enemy;
+        this.entryTime = scene.time.now;
+        this.enemy.setVelocityX(0)
+        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName());
+    }
+
+    updateState(){
+        const {scene, config} = this.enemy;
+
+        if(scene.time.now >= this.entryTime + config.attackDelay) {
+            this.enemy.play(this.enemy.getSpriteAnimations("Attack").getAnimationName());
+        }
+    }
+
+    exitState(){}
+
+    getNextState(){
+        return this.stateKey;
+    }
+
+    /**
+     * 
+     * @param {Object} other The object which has entered the trigger. 
+     */
+    onTriggerEnter(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which is staying the trigger. 
+     */
+    onTriggerStay(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which has exited the trigger. 
+     */
+    onTriggerExit(other){}
+}
+
+class SkeletonBlockState extends EnemyState{
     /**
      * 
      * @param {Enemy} enemy The object which will provide the context for the enemy states.
@@ -220,7 +333,7 @@ class SkeletonJumpState extends EnemyState{
      */
     onTriggerExit(other){}
 }
-class SkeletonSlideState extends EnemyState{
+class SkeletonDamagedState extends EnemyState{
     /**
      * 
      * @param {Enemy} enemy The object which will provide the context for the enemy states.
@@ -296,7 +409,7 @@ class SkeletonSlideState extends EnemyState{
     onTriggerExit(other){}
 }
 
-class SkeletonAttackState extends EnemyState{
+class SkeletonDeadState extends EnemyState{
     /**
      * 
      * @param {Enemy} enemy The object which will provide the context for the enemy states.

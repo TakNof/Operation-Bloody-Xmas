@@ -45,7 +45,7 @@ class Game extends Phaser.Scene{
 
         this.skeletonAnimations = [
             {name: "Idle", animationParams: {end: 4, framerate: 10}},
-            {name: "Walk", animationParams: {end: 4, framerate: 30, repeat: -1}},
+            {name: "Walk", animationParams: {end: 4, framerate: 10, repeat: -1}},
             {name: "Attack", animationParams: {end: 8, framerate: 30}},
             {name: "Blocking", animationParams: {end: 4, framerate: 15}},
             {name: "Damaged", animationParams: {end: 4, framerate: 15}},
@@ -59,27 +59,46 @@ class Game extends Phaser.Scene{
     }
 
     create(){
-        this.grid = this.add.grid(0, 0, canvasSize.width*2, canvasSize.height*2, 32, 32, 0x00b9f2).setAltFillStyle(0x016fce).setOutlineStyle();
+        this.grid = this.add.grid(0, 0, canvasSize.width*4, canvasSize.height*4, 32, 32, 0x00b9f2).setAltFillStyle(0x016fce).setOutlineStyle();
                 
-        this.walls = new WallsBuilder(this, "wall", 32, 20, true, true);
+        this.walls = new WallsBuilder(this, "wall", 32, 20, true, false);
         this.walls.createWalls();
 
-        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height/2}, "player", {x: 80, y: 128}, 200, 2, 100);
+        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.8}, "player", {x: 80, y: 128}, 200, 2, 100);
         this.player.setWeapons(this.weapons);
         this.player.setSpriteAnimations(this.playerAnimations);
         this.player.setStateMachine("Idle", "Walk", "Jump", "Run", "Slide", "Attack", "Dead");
+        this.player.setRaycaster(1);
     
-        this.skeleton = new Skeleton(this, {x: 500, y: 600}, "skeleton", {x: 20, y: 48}, 100, 300, {});
+        console.log(this.player.getRaycaster());
+
+        let skeletonConfig = {
+            health: 300,
+            chaseDistance: 500,
+            attackDistance: 100,
+            attackDelay: 3000,
+            damage: 40,
+            attackRate: 1000
+        }
+    
+        this.skeleton = new Skeleton(this, {x: canvasSize.height*4*0.015, y: canvasSize.height*4*0.8}, "skeleton", {x: 20, y: 48}, 100, skeletonConfig);
         this.skeleton.setSpriteAnimations(this.skeletonAnimations);
-        this.skeleton.setStateMachine("Idle", "Walk", "Attack", "Blocking", "Damaged", "Dead");
+        this.skeleton.setStateMachine("Idle", "Patrol", "Chase", "Search", "Attack", "Block", "Damaged", "Dead");
+        this.skeleton.getStateMachine().reportTransitions = true;
         this.skeleton.setScale(2, 2);
 
         console.log(this.skeleton);
 
+        this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
+        this.player.getRaycaster().mapGameObjects(this.skeleton, true );
+        
         this.walls.setColliders(this.player, this.skeleton);
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
+        this.cameras.main.setZoom(0.5, 1);
         this.cameras.main.startFollow(this.player);
+       
+
         this.physics.world.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
     }
 

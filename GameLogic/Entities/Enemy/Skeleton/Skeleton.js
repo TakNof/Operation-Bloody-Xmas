@@ -7,14 +7,17 @@ class Skeleton extends Enemy{
     * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
     * @param {Number} size The size of the sprite in pixels.
     * @param {Number} defaultVelocity The default velocity for the living sprite.
-    * @param {Number} chaseDistance The distance where the player can be detected by the enemy.
     * @param {Object} config The specific configuration for the Skeleton enemy.
     */
-    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity, chaseDistance, config){
-        super(scene, originInfo, spriteImgStr, size, defaultVelocity, chaseDistance);
-
-        this.config = config;
+    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity, config){
+        super(scene, originInfo, spriteImgStr, size, defaultVelocity, config);
 
         this.setOffset(70, 50)
+    }
+
+    onWallFound(){
+        if(this.body.onWall()){
+            this.setVelocityY(-400);
+        } 
     }
 }

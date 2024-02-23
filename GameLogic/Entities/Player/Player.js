@@ -232,5 +232,9 @@ class Player extends Living{
 
     update(){
         this.getStateMachine().update();
+        for(let ray of this.getRaycaster().rays){
+            ray.setOrigin(this.getPositionX(), this.getPositionY());
+            ray.cast()
+        }
     }
 }

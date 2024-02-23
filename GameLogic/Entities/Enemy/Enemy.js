@@ -12,38 +12,22 @@ class Enemy extends Living{
     * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
     * @param {Number} size The size of the sprite in pixels.
     * @param {Number} defaultVelocity The default velocity for the living sprite.
-    * @param {Number} chaseDistance The distance where the player can be detected by the enemy.
     */
-    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity, chaseDistance){
+    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity, config){
         super(scene, originInfo, spriteImgStr, size, defaultVelocity);
 
-        this.setChaseDistance(chaseDistance);
+        this.config = config;
+
+        this.playerInSight = false;
     }
 
     /**
-     * Sets the chase distance of the enemy
-     * @param {Number} chaseDistance
+     * Sets the distance between the player and the enemy using the player's position. 
      */
-    setChaseDistance(chaseDistance){
-        this.chaseDistance = chaseDistance;
+    setDistanceToPlayer(){
+        this.distanceToPlayer = hypoCalc(this.getPositionX(), this.getScene().player.getPositionX(), this.getPositionY(), this.getScene().player.getPositionY());
     }
-
-    /**
-     * Gets the chase distance of the enemy.
-     * @return {Number} chaseDistance
-     */
-    getChaseDistance(){
-        return this.chaseDistance
-    }
-
-    /**
-     * Sets the distance between the player and the enemy using the player's position.
-     * @param {Object} playerPosition 
-     */
-    setDistanceToPlayer(playerPosition){
-        this.distanceToPlayer = hypoCalc(this.getPositionX(), playerPosition.x, this.getPositionY(), playerPosition.y);
-    }
-
+    
     /**
      * Gets the distance between the player and the enemy.
      * @return {number}
@@ -202,7 +186,9 @@ class Enemy extends Living{
     }
 
     update(){
+        this.setDistanceToPlayer();
         this.getStateMachine().update();
+        // console.log(this.getStateMachine().getStateHistory());
     }
 }
 

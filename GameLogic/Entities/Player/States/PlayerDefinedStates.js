@@ -333,8 +333,7 @@ class PlayerAttackState extends PlayerState{
 
     enterState(){
         this.isOnProgress = true;
-        console.log("Entering Attack State");
-
+        
         let sign = this.player.flipX ? -1 : 1;
         this.player.getScene().tweens.add({
             targets: this.player.getCurrentWeapon(),
