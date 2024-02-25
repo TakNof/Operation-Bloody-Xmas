@@ -6,11 +6,12 @@ let config = {
         default: "arcade",
         arcade: {
             gravity: { y: 980 },
-            debug: true
+            debug: false
         }
     },
     width: canvasSize.width,
     height: canvasSize.height,
+    pixelArt: true,
     scene: Game,
     plugins: {
         scene: [

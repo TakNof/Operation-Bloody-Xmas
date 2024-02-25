@@ -7,7 +7,7 @@ class StateMachine{
         this.states = states;
         this.statesHistory = [];
         this.isTransitioningState = false;
-        this.reportTransitions = false;
+        this.printTransitions = false;
         if (new.target === StateMachine) {
           throw new Error("Can not instanciate an abstract class.");
         }
@@ -31,7 +31,7 @@ class StateMachine{
     }
 
     transitionToState(stateKey){
-        if(this.reportTransitions){
+        if(this.printTransitions){
             console.log(`Passing ${this.currentState.stateKey} to ${stateKey}`);
         }
        
@@ -44,13 +44,12 @@ class StateMachine{
         this.currentState.enterState();
 
         this.isTransitioningState = false;
-
-        this.cleanStatesHistory();
     }
     
     addStateToHistory(){
         // this.statesHistory.push({state: this.currentState.stateKey, time: this.contextObject.scene.time.now});
         this.statesHistory.push(this.currentState.stateKey);
+        this.cleanStatesHistory();
     }
 
     getStateHistory(){

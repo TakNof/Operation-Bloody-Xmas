@@ -12,7 +12,7 @@ class PlayerIdleState extends PlayerState{
 
     updateState(){
 
-        const {a, d, left, right, shift, space} = this.player.controls;
+        const {a, d, left, right, shift, space} = this.player.config.controls;
 
         this.player.setVelocityX(0);
 
@@ -31,12 +31,6 @@ class PlayerIdleState extends PlayerState{
         }
 
         this.updateChildren();
-
-        this.player.getScene().input.on('pointerdown', function (pointer){
-            if(this.player.getStateMachine().currentState.stateKey != "Attack"){
-                this.player.getStateMachine().transitionToState("Attack");
-            }
-        }, this.player.getScene());
     }
 
     exitState(){}
@@ -77,7 +71,8 @@ class PlayerWalkState extends PlayerState{
     enterState(){}
 
     updateState(){
-        const {a, d, left, right, shift, space} = this.player.controls;
+        const {a, d, left, right, shift, space} = this.player.config.controls;
+        const {defaultVelocity} = this.player.config;
 
         if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown)){
             this.player.stateMachine.transitionToState('Idle');
@@ -94,13 +89,14 @@ class PlayerWalkState extends PlayerState{
         }
 
         if(left.isDown || a.isDown){
-            this.player.setVelocityX(-this.player.defaultVelocity);
-            this.player.flipX = true;
-
+            this.player.flipX= true;
         }else if(right.isDown || d.isDown){
-            this.player.setVelocityX(this.player.defaultVelocity);
-            this.player.flipX = false;
+            this.player.flipX= false;
         }
+
+        let sign = this.player.flipX ? -1: 1;
+
+        this.player.setVelocityX(sign*defaultVelocity);
 
         this.updateChildren();
     }
@@ -143,25 +139,32 @@ class PlayerRunState extends PlayerState{
     enterState(){}
 
     updateState(){
-        const {a, s, d, left, down, right, shift, space} = this.player.controls;
+        const {scene} = this.player;
+        const {a, s, d, left, down, right, shift, space} = this.player.config.controls;
+        const {defaultVelocity, velocityMultiplier, slideCooldown, slideDashAdder} = this.player.config;
+
+        if(left.isDown || a.isDown){
+            this.player.flipX= true;
+
+        }else if(right.isDown || d.isDown){
+            this.player.flipX= false;
+        }
+
+        let sign = this.player.flipX ? -1: 1;
+
+        this.player.setVelocityX(sign*defaultVelocity*velocityMultiplier);
 
         if(this.player.body.onFloor()){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
-            }else if(down.isDown ^ s.isDown){
+            }else if(down.isDown ^ s.isDown && scene.time.now - this.player.lastSlideTimer >= slideCooldown){
+                this.player.lastSlideTimer = scene.time.now;
+                
+                this.player.setVelocityX(sign*(defaultVelocity*velocityMultiplier + slideDashAdder));
                 this.player.stateMachine.transitionToState("Slide");
             }else{
                 this.player.play(this.player.getSpriteAnimations("Run").getAnimationName(), true);
             }
-        }
-
-        if(left.isDown || a.isDown){
-            this.player.setVelocityX(-this.player.defaultVelocity*this.player.velocityMultiplier);
-            this.player.flipX= true;
-
-        }else if(right.isDown || d.isDown){
-            this.player.setVelocityX(this.player.defaultVelocity*this.player.velocityMultiplier);
-            this.player.flipX= false;
         }
         
         if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
@@ -245,6 +248,7 @@ class PlayerJumpState extends PlayerState{
      */
     onTriggerExit(other){}
 }
+
 class PlayerSlideState extends PlayerState{
     /**
      * 
@@ -256,8 +260,6 @@ class PlayerSlideState extends PlayerState{
     }
 
     enterState(){
-        this.startingSlideTime = this.player.getScene().time.now;
-        this.totalSlideTime = 500;
         this.player.setFrictionX(1);
         this.previousSize = this.player.getSize();
         this.player.setOwnSize({x: 128, y: 64})
@@ -272,7 +274,15 @@ class PlayerSlideState extends PlayerState{
     }
 
     updateState(){
-        const {a, d, left, right, shift, space} = this.player.controls;
+        const {a, d, left, right, shift, space} = this.player.config.controls;
+        const {scene} = this.player;
+        const {defaultVelocity, velocityMultiplier, slideDuration} = this.player.config;
+
+        let sign = this.player.flipX ? -1: 1;
+
+        if(this.player.getVelocityX() != sign*defaultVelocity * velocityMultiplier){
+            this.player.setVelocityX(this.player.getVelocityX() - sign*10);
+        }
 
         if(this.player.body.onFloor()){
             if(space.isDown){
@@ -282,8 +292,10 @@ class PlayerSlideState extends PlayerState{
             }
         }
 
-        if(this.player.getScene().time.now - this.startingSlideTime >= this.totalSlideTime){
-            if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
+        if(scene.time.now - this.player.lastSlideTimer >= slideDuration){
+            if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && shift.isDown){
+                this.player.stateMachine.transitionToState('Run');
+            }else if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
                 this.player.stateMachine.transitionToState('Walk');
             }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
                 this.player.stateMachine.transitionToState('Idle');
@@ -341,6 +353,9 @@ class PlayerAttackState extends PlayerState{
             duration: 100,
             ease: "Linear",
             yoyo: true,
+            onStart: () => {
+                this.checkHittingEnemies();
+            },
             onComplete: () => {
                 this.isOnProgress = false;
             },
@@ -350,14 +365,65 @@ class PlayerAttackState extends PlayerState{
     updateState(){
         this.updateChildren(true, false, true);
         
-        if(!this.isOnProgress){
-            this.player.getScene().input.off('pointerdown', function (pointer){
-                this.player.getStateMachine().transitionToState("Attack");
-            }, this.player.getScene());
-    
-
+        if(!this.isOnProgress && this.player.isAlive){
             this.player.getStateMachine().transitionToState("Idle");
         }
+    }
+
+    checkHittingEnemies(){
+        const {scene, config} = this.player;
+
+        scene.physics.overlap(this.player.getCurrentWeapon(), scene.skeletons, (weapon, enemy) =>{
+            if(!enemy.isStunned){
+                enemy.lastAttackTimer = -enemy.config.attackRate;
+            }
+
+            enemy.getStateMachine().transitionToState("Damaged");
+            enemy.decreaseHealthBy(this.player.getCurrentWeapon().config.damage);
+        });
+    }
+
+    exitState(){}
+
+    getNextState(){
+        return this.stateKey;
+    }
+
+    /**
+     * 
+     * @param {Object} other The object which has entered the trigger. 
+     */
+    onTriggerEnter(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which is staying the trigger. 
+     */
+    onTriggerStay(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which has exited the trigger. 
+     */
+    onTriggerExit(other){}
+}
+
+class PlayerDeadState extends PlayerState{
+    /**
+     * 
+     * @param {Player} player The object which will provide the context for the player states.
+     * @param {Object} key
+     */
+    constructor(player, key){
+        super(player, key);
+    }
+
+    enterState(){
+        this.player.play(this.player.getSpriteAnimations("Dead").getAnimationName());
+    }
+
+    updateState(){
+        this.player.setVelocityX(0)
     }
 
     exitState(){}

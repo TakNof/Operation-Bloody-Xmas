@@ -18,8 +18,10 @@ class Living extends Entity{
         this.defaultVelocity = defaultVelocity;
         
         this.children = [];
+        this.damagedTimeHistory = [];
 
         this.isAlive = true;
+        this.isStunned = false;
     }
 
     /**
@@ -147,12 +149,130 @@ class Living extends Entity{
         }
     }
 
+    decreaseHealthBy(damageValue){
+        if(this.getHealth() - damageValue <= 0){
+            this.setHealth(0);
+            this.isAlive = false;
+            this.getStateMachine().transitionToState("Dead");
+        }else{
+            this.setHealth(this.getHealth() - damageValue);
+        }
+
+        this.setTint(0xeb0e0e);
+
+        setTimeout(() => {
+            this.clearTint();
+        }, 200);
+    }
+
+    addDamagedTimeToHistory(){
+        this.damagedTimeHistory.push(this.getScene().time.now);
+        this.cleanDamagedTimeHistory();
+    }
+
+    getDamagedTimeHistory(){
+        return this.damagedTimeHistory;
+    }
+
+    cleanDamagedTimeHistory(){
+        if(this.damagedTimeHistory.length > 5){
+            this.damagedTimeHistory.shift();
+        }
+    }
+
+    checkStunning(){
+        let damageTimeSpan = 0;
+
+        if(this.getDamagedTimeHistory().length < 4){
+        return;
+        }
+
+        for(let i = 0; i < 4; i++){
+            damageTimeSpan -= this.getDamagedTimeHistory()[i];
+        }
+
+        let dodge = getRndInteger(1, 5) == 1;
+
+        this.isStunned = damageTimeSpan <= 50 && !dodge;
+
+        if(this.isStunned && !dodge){
+            this.getScene().cameras.main.shake(100, 0.005);
+
+            const stunnedText = this.createIndicativeText("stunned");
+            let stunDuration = getRndInteger(1, 5)*1000;
+            this.getScene().tweens.add({
+                targets: stunnedText,
+                y: stunnedText.y - 50,
+                alpha: 0,
+                scaleX: 0.5,
+                scaleY: 0.5,
+                duration: 1000,
+                ease: "Cubic",
+                onComplete: () => {
+                    stunnedText.destroy();
+                },
+            });
+
+            this.getScene().tweens.add({
+                targets: this,
+                duration: stunDuration,
+                yoyo: true,
+                repeat: -1,
+                onYoyo: () => {
+                    this.clearTint();
+                },
+                onRepeat: () => {
+                    this.setTint(0xcad4a5);
+                }
+            });
+
+            this.stunnedTimer = setTimeout(() => {
+                this.isStunned = false;
+                this.clearTint();
+            }, stunDuration);
+        }
+
+        if(dodge){
+            const dodgeText = this.createIndicativeText("dodge");
+            
+            this.getScene().tweens.add({
+                targets: dodgeText,
+                y: dodgeText.y - 50,
+                alpha: 0,
+                scaleX: 0.5,
+                scaleY: 0.5,
+                duration: 1000,
+                ease: "Cubic",
+                onComplete: () => {
+                    dodgeText.destroy();
+                },
+            });
+        }
+    }
+
+    createIndicativeText(text, config){
+        if(!config){
+            config = {
+                fontFamily: "Arial",
+                fontSize: 24,
+                color: "#ff0000",
+                align: "center",
+                stroke: "#000000",
+                strokeThickness: 2,
+                fixedWidth: 100,
+                alpha: 0
+            }
+        }
+        return this.getScene().add.text(this.getPositionX(), this.getPositionY(), `${text.charAt(0).toUpperCase() + text.slice(1)}!`, config).setOrigin(0.5, 0.5);
+    }
+
     /**
      * 
      * @param {Sprite} child 
      */
     addChild(child){
-        child.relativePosition = child.getPosition();
+        child.relativePosition = {x: child.x, y: child.y};
+
         this.getScene().physics.add.existing(child, false);
         this.children.push(child);
     }

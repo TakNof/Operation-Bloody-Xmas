@@ -23,7 +23,6 @@ class PlayerState extends BaseState {
                 if(updateVelocity){
                     this.updateChildVelocity(child);
                 }
-                
             }
         }
     }

@@ -8,34 +8,40 @@ class Player extends Living{
     * @constructor
     * @param {Phaser.Scene} scene The scene to place the sprite in the game.
     * @param {{x: Number, y: Number}} originInfo A literal Object with the initial positioning information for the sprite.
-    * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
-    * @param {Number} size The size of the sprite in pixels.
-    * @param {Number} defaultVelocity The default velocity for the Living sprite.
-    * @param {Number} velocityMultiplier The runing velocity of the Player.
-    * @param {Number} maxHealth The maximum health of the player.
+    * @param {Object} config The configuration object for the Enemy.
     * 
     */
-    constructor(scene, originInfo, playerImgStr, size, defaultVelocity, velocityMultiplier, maxHealth){
-        super(scene, originInfo, playerImgStr, size, defaultVelocity);
-        this.velocityMultiplier = velocityMultiplier;
-
-        this.controls = this.getScene().input.keyboard.createCursorKeys();
-
-       for(let key of ["w", "a", "s", "d", "r", "shift", "space", "enter", "esc"]) {
-            this.controls[key.toLowerCase()] = this.getScene().input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[key.toUpperCase()]);
-        }
+    constructor(scene, originInfo, config){
+        super(scene, originInfo, config.name, config.size, config.defaultVelocity);
+        this.config = config;
 
         this.setBounce(0.1);
 
-        this.setMaxHealth(maxHealth);
+        this.setMaxHealth(config.maxHealth);
+        this.setStateMachine(...config.possibleStates);
+        this.setSpriteAnimations(config.animations);
+        this.setWeapons(config.weapons);
 
+        this.pressedKeyHistory = [];
         // this.setSpriteSounds("player", "hurt", "death", "heal");
 
-        this.roundsShot = 0;
-        this.damageDealed = 0;
-        this.damageReceived = 0;
-        this.lastSwitchWeaponTimer = 0;
-        this.creationTime = this.getScene().time.now;
+        // this.roundsShot = 0;
+        // this.damageDealed = 0;
+        // this.damageReceived = 0;
+        // this.lastSwitchWeaponTimer = 0;
+        // this.creationTime = this.getScene().time.now;
+        this.lastSlideTimer = -config.slideCooldown;
+
+        this.getScene().input.keyboard.on('keydown', (event) => {
+            if(this.config.controls[event.key.toLowerCase()])
+                this.addkeyToHistory(event.key.toLowerCase());
+        });
+
+        this.getScene().input.on('pointerdown', function (pointer){
+            if(pointer.leftButtonDown() && this.player.getStateMachine().currentState.stateKey != "Attack" && this.player.isAlive){
+                this.player.getStateMachine().transitionToState("Attack");
+            }
+        }, this.getScene());
     }
 
     /**
@@ -47,7 +53,7 @@ class Player extends Living{
 
         for(let [i, weapon] of weapons.entries()){
             let weaponClass = this.__checkClassConstructor(`${weapon.type}Weapon`, "Weapon");
-            this.weapons[i] = new weaponClass(this.getScene(), weapon.position, weapon.name, weapon.size, weapon.config);
+            this.weapons[i] = new weaponClass(this.getScene(), weapon.position, weapon);
             this.weapons[i].setVisible(false);
             this.addChild(this.weapons[i]);
         }
@@ -230,8 +236,24 @@ class Player extends Living{
         return this.score;
     }
 
+    addkeyToHistory(key){
+        this.pressedKeyHistory.push(key);
+        this.cleanPressedKeyHistory();
+    }
+
+    getPressedKeyHistory(){
+        return this.pressedKeyHistory;
+    }
+
+    cleanPressedKeyHistory(){
+        if(this.pressedKeyHistory.length > 5){
+            this.pressedKeyHistory.shift();
+        }
+    }
+
     update(){
         this.getStateMachine().update();
+        this.getScene().sound.listenerPosition.set(this.getPositionX(), this.getPositionY());
         for(let ray of this.getRaycaster().rays){
             ray.setOrigin(this.getPositionX(), this.getPositionY());
             ray.cast()

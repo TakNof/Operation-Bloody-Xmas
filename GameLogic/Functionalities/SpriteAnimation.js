@@ -34,7 +34,7 @@ class SpriteAnimation{
      * Sets the animation name.
      */
     setAnimationName(){
-        this.animationName =`${this.spriteName}_Animation`;
+        this.animationName =`${this.spriteName}`;
     }
 
     /**

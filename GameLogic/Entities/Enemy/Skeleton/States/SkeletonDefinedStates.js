@@ -9,9 +9,7 @@ class SkeletonIdleState extends EnemyState{
     }
 
     enterState(){
-        this.enemy.setVelocityX(0);
-        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
-
+        this.soundConfig = `Idle_${getRndInteger(1, 3)}`;
         this.timeout = setTimeout(() =>{
             this.enemy.getStateMachine().transitionToState("Patrol");
         
@@ -20,7 +18,12 @@ class SkeletonIdleState extends EnemyState{
 
     updateState(){
         this.enemy.setVelocityX(0);
-        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
+        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+        if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
+            this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
+        }
+        
+        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && this.enemy.getScene().player.isAlive){
             clearTimeout(this.timeout);
             this.enemy.getStateMachine().transitionToState("Chase");
         }
@@ -62,7 +65,7 @@ class SkeletonPatrolState extends EnemyState{
     }
 
     enterState(){
-        this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+        this.soundConfig = `Walk_${getRndInteger(1, 4)}`;
         this.enemy.setVelocityX(-this.enemy.defaultVelocity);
         this.enemy.flipX = true;
 
@@ -77,8 +80,14 @@ class SkeletonPatrolState extends EnemyState{
     }
 
     updateState(){
+        const {player} = this.enemy.scene
         this.enemy.onWallFound();
-        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
+        this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+        if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying && this.enemy.body.onFloor()){
+            this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
+        }
+
+        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && player.isAlive){
             clearTimeout(this.firstTimeout);
             clearTimeout(this.secondTimeout);
             this.enemy.getStateMachine().transitionToState("Chase");
@@ -120,19 +129,25 @@ class SkeletonChaseState extends EnemyState{
         super(enemy, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.soundConfig = `Walk_${getRndInteger(1, 4)}`;
+    }
 
     updateState(){
         const {player} = this.enemy.getScene();
 
         this.enemy.onWallFound();
-        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.attackDistance){
+        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.attackDistance && player.isAlive){
             this.enemy.getStateMachine().transitionToState("Attack");
-        }else if(this.enemy.getDistanceToPlayer() >= this.enemy.config.chaseDistance){
+        }else if(this.enemy.getDistanceToPlayer() >= this.enemy.config.chaseDistance && player.isAlive){
             this.enemy.lastPlayerSeenPosition = player.getPosition();
             this.enemy.getStateMachine().transitionToState("Search");
         }else{
             this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+            if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying && this.enemy.body.onFloor()){
+                this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
+            }
+
             this.enemy.flipX = player.getPositionX() < this.enemy.getPositionX();
             let sign = this.enemy.flipX ? -1: 1;
 
@@ -175,7 +190,10 @@ class SkeletonSearchState extends EnemyState{
         super(enemy, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.soundConfig1 = `Idle_${getRndInteger(1, 3)}`;
+        this.soundConfig2 = `Walk_${getRndInteger(1, 4)}`;
+    }
 
     updateState(){
         this.enemy.onWallFound();
@@ -186,6 +204,10 @@ class SkeletonSearchState extends EnemyState{
 
             this.enemy.setVelocityX(0);
             this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+            if(!this.enemy.getSpriteSounds(this.soundConfig1).sound.isPlaying){
+                this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
+            }
+            
             if(!this.interval){
                 this.interval = setInterval(() =>{
                     this.enemy.flipX = !this.enemy.flipX;
@@ -204,6 +226,9 @@ class SkeletonSearchState extends EnemyState{
 
         }else if(!this.reachedPlayerLastSeenPosition){
             this.enemy.play(this.enemy.getSpriteAnimations("Walk").getAnimationName(), true);
+            if(!this.enemy.getSpriteSounds(this.soundConfig2).sound.isPlaying && this.enemy.body.onFloor()){
+                this.enemy.getSpriteSounds(this.soundConfig2).playSound(this.enemy.getPosition());
+            }
             this.enemy.flipX = this.enemy.lastPlayerSeenPosition.x < this.enemy.getPositionX();
             let sign = this.enemy.flipX ? -1: 1;
 
@@ -247,24 +272,73 @@ class SkeletonAttackState extends EnemyState{
     }
 
     enterState(){
-        const {scene} = this.enemy;
-        this.entryTime = scene.time.now;
-        this.enemy.setVelocityX(0)
-        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName());
+        this.soundConfig1 = `Idle_${getRndInteger(1, 3)}`;
+        this.idleAnim = true;
+        this.enemy.setVelocityX(0);
     }
 
     updateState(){
-        const {scene, config} = this.enemy;
+        const {scene, config, swordHitBox} = this.enemy;
+        const {player} = this.enemy.getScene();
+        this.updateChildren();
 
-        if(scene.time.now >= this.entryTime + config.attackDelay) {
-            this.enemy.play(this.enemy.getSpriteAnimations("Attack").getAnimationName());
+        if(this.idleAnim){
+            this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+            if(!this.enemy.getSpriteSounds(this.soundConfig1).sound.isPlaying){
+                this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
+            }
+        }
+        
+        this.enemy.flipX = player.getPositionX() < this.enemy.getPositionX();
+
+        if(player.isAlive){
+            let rangeAttack = this.enemy.getDistanceToPlayer() - this.enemy.config.attackDistance;
+            if(rangeAttack > 20){
+                this.enemy.getStateMachine().transitionToState("Chase");
+            }else if(scene.time.now  - this.enemy.lastAttackTimer >= config.attackRate) {
+                swordHitBox.body.enable = true;
+                this.soundConfig2 = `Attack_${getRndInteger(1, 5)}`;
+                this.enemy.play(this.enemy.getSpriteAnimations("Attack").getAnimationName())
+
+                this.idleAnim =  false;
+                this.enemy.lastAttackTimer = scene.time.now;
+    
+                this.enemy.on(`animationupdate`, (anim, frame) =>{
+                    if(frame.index == config.hitFrame){
+                        this.startHit();
+                    }
+                });
+            }
+        }else{
+            this.enemy.getStateMachine().transitionToState("Patrol");
+        }
+
+        this.enemy.on(`animationcomplete-${this.enemy.getSpriteAnimations("Attack").getAnimationName()}`, ()=>{
+            this.idleAnim = true;
+        })
+    }
+
+    exitState(){
+        if(this.enemy.isStunned){
+            this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackDelay;
         }
     }
 
-    exitState(){}
-
     getNextState(){
         return this.stateKey;
+    }
+
+    startHit(){
+        const {scene, config, swordHitBox} = this.enemy;
+        const {player} = this.enemy.getScene();
+        if(scene.physics.overlap(swordHitBox, player) && player.isAlive){
+            player.decreaseHealthBy(config.damage);
+            swordHitBox.body.enable = false;
+            
+            if(!this.enemy.getSpriteSounds(this.soundConfig2).sound.isPlaying){
+                this.enemy.getSpriteSounds(this.soundConfig2).playSound(this.enemy.getPosition());
+            }
+        }
     }
 
     /**
@@ -333,6 +407,7 @@ class SkeletonBlockState extends EnemyState{
      */
     onTriggerExit(other){}
 }
+
 class SkeletonDamagedState extends EnemyState{
     /**
      * 
@@ -344,47 +419,70 @@ class SkeletonDamagedState extends EnemyState{
     }
 
     enterState(){
-        this.startingSlideTime = this.enemy.getScene().time.now;
-        this.totalSlideTime = 500;
-        this.enemy.setFrictionX(1);
-        this.previousSize = this.enemy.getSize();
-        this.enemy.setOwnSize({x: 128, y: 64})
-
-        for(let i = 0; i < 24; i++){
-            if(this.enemy.flipX){
-                this.enemy.body.setOffset(i*4,100);
-            }else{
-                this.enemy.body.setOffset(i,100);
-            }
+        this.soundConfig = `Damaged_${getRndInteger(1, 4)}`;
+        this.enemy.play(this.enemy.getSpriteAnimations("Damaged").getAnimationName(), true);
+        if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
+            this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
         }
+
+        this.enemy.addDamagedTimeToHistory();
+        this.enemy.checkStunning();
+        this.enemy.on(`animationcomplete-${this.enemy.getSpriteAnimations("Damaged").getAnimationName()}`, ()=>{
+            if(this.enemy.isStunned){
+                this.enemy.getStateMachine().transitionToState("Stunned");
+            }else{
+                this.enemy.getStateMachine().transitionToState("Attack");
+            }
+        })  
     }
+
+    updateState(){}
+
+    exitState(){}
+
+    getNextState(){
+        return this.stateKey;
+    }
+
+    /**
+     * 
+     * @param {Object} other The object which has entered the trigger. 
+     */
+    onTriggerEnter(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which is staying the trigger. 
+     */
+    onTriggerStay(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which has exited the trigger. 
+     */
+    onTriggerExit(other){}
+}
+
+class SkeletonStunnedState extends EnemyState{
+    /**
+     * 
+     * @param {Enemy} enemy The object which will provide the context for the enemy states.
+     * @param {Object} key
+     */
+    constructor(enemy, key){
+        super(enemy, key);
+    }
+
+    enterState(){}
 
     updateState(){
-        const {a, d, left, right, shift, space} = this.enemy.controls;
-
-        if(this.enemy.body.onFloor()){
-            if(space.isDown){
-                this.enemy.stateMachine.transitionToState('Jump');
-            }else{
-                this.enemy.play(this.enemy.getSpriteAnimations("Slide").getAnimationName(), true);
-            }
+        this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
+        if(!this.enemy.isStunned){
+            this.enemy.getStateMachine().transitionToState("Patrol");
         }
-
-        if(this.enemy.getScene().time.now - this.startingSlideTime >= this.totalSlideTime){
-            if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
-                this.enemy.stateMachine.transitionToState('Walk');
-            }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
-                this.enemy.stateMachine.transitionToState('Idle');
-            }
-        }
-
-        this.updateChildren();
     }
 
-    exitState(){
-        this.enemy.setFrictionX(0);
-        this.enemy.setOwnSize(this.previousSize);
-    }
+    exitState(){}
 
     getNextState(){
         return this.stateKey;
@@ -420,33 +518,30 @@ class SkeletonDeadState extends EnemyState{
     }
 
     enterState(){
-        this.isOnProgress = true;
-        console.log("Entering Attack State");
+        this.soundConfig = "Dead";
 
-        let sign = this.enemy.flipX ? -1 : 1;
-        this.enemy.getScene().tweens.add({
-            targets: this.enemy.getCurrentWeapon(),
-            angle: sign*180,
-            duration: 100,
-            ease: "Linear",
-            yoyo: true,
-            onComplete: () => {
-                this.isOnProgress = false;
-            },
-        });
+        this.enemy.play(this.enemy.getSpriteAnimations("Dead").getAnimationName());
+        if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
+            this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
+        }
+
+        this.enemy.body.enable = false;
+
+        setTimeout(() => {
+            this.enemy.getScene().tweens.add({
+                targets: this.enemy,
+                alpha: 0,
+                duration: 5000,
+                ease: "Cubic",
+                onComplete: () => {
+                    this.enemy.destroy();
+                },
+            });
+        }, 1000);
     }
 
     updateState(){
-        this.updateChildren(true, false, true);
-        
-        if(!this.isOnProgress){
-            this.enemy.getScene().input.off('pointerdown', function (pointer){
-                this.enemy.getStateMachine().transitionToState("Attack");
-            }, this.enemy.getScene());
-    
-
-            this.enemy.getStateMachine().transitionToState("Idle");
-        }
+        this.enemy.setVelocityX(0);
     }
 
     exitState(){}

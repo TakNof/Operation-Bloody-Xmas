@@ -9,16 +9,24 @@ class Enemy extends Living{
     * @constructor
     * @param {Phaser.Scene} scene The scene to place the sprite in the game.
     * @param {{x: Number, y: Number}} originInfo A literal Object with the initial positioning information for the sprite.
-    * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
-    * @param {Number} size The size of the sprite in pixels.
-    * @param {Number} defaultVelocity The default velocity for the living sprite.
+    * @param {Object} config The configuration object for the Enemy.
     */
-    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity, config){
-        super(scene, originInfo, spriteImgStr, size, defaultVelocity);
+
+    constructor(scene, originInfo, config){
+        super(scene, originInfo, config.name, config.size, config.defaultVelocity);
 
         this.config = config;
 
+        this.setMaxHealth(config.maxHealth);
+        this.setSpriteAnimations(config.animations);
+        this.setSpriteSounds(config.name, config.sounds);
+        this.setStateMachine(...config.possibleStates);
+        
+
         this.playerInSight = false;
+        this.stunned = false;
+
+        this.lastAttackTimer = config.attackDelay;
     }
 
     /**
@@ -196,42 +204,50 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
     /**
      * The constructor for the Cacodemon class.
      * @constructor
-     * @param {Phaser.Scene} scene2D The scene to place the 2D sprites in the game.
-     * @param {Phaser.Scene} scene3D The scene to place the 3D sprites in the game.
+     * @param {Phaser.Scene} scene2D The scene to place the sprites in the game.
      * @param {Number} amount The amount of enemies to place.
-     * @param {{name: string,
-     * name3D: String, defaultVelocity: Number, 
-     * angleOffset: Number, chaseDistance: Number,
-     * maxHealth: Number, bulletProperties: {
-     * damage: Number, velocity: Number, delay: Number, critical: Number},
-     * distanceLimits: {min: Number, max: Number},
-     * animationsToSet: [...{name: String, animationParams:{end: Number, framerate: Number}}],
-     * spriteSounds: [String]}} config
+     * @param {Enemy} enemyObject The enemy object to make the copies of.
      */
-    constructor(scene, scene3D, amount, wallObject, config){
+    constructor(scene, amount, wallObject, config){
         super(scene.physics.world, scene);
 
         this.maxSize = amount;
 
         this.wallMatrix = wallObject.getWallMatrix().slice();
         let wallNumberRatio = wallObject.getWallNumberRatio();
-        let blockSize = wallObject.getWallBlockSize();
 
+        let className = this.__checkClassConstructor(config.name.charAt(0).toUpperCase() + config.name.slice(1), "Enemy");
         for(let i = 0; i < amount; i++){
-            this.add(new Enemy(scene, scene3D, this.setInitialPosition(wallNumberRatio, config.angleOffset), config.name, 0, blockSize*2, config.defaultVelocity, config.chaseDistance));
+            this.add(new className(scene, this.setInitialPosition(wallNumberRatio), config))
         }
 
-        this.callAll("setBulletProperties", config.bulletProperties);
-        this.callAll("setDistanceLimits", config.distanceLimits);
-        this.callAll("setAnimations", config.animationsToSet);
-        this.callAll("setSpriteSounds", config.name.replace("small_", ""), config.spriteSounds);
-        this.callAll("setRaycaster", this.wallMatrix, config.angleOffset, 1);
-        this.callAll("setDebug", game.config.physics.arcade.debug);
-        this.callAll("setSpriteRays", colors.black);
-        this.callAll("setMaxHealth", config.maxHealth);
+
+        // this.callAll("setRaycaster", this.wallMatrix, config.angleOffset, 1);
+        // this.callAll("setDebug", game.config.physics.arcade.debug);
+        this.callAll("createSwordHitBox", config.swordHitBoxInfo.x, config.swordHitBoxInfo.y, config.swordHitBoxInfo.width, config.swordHitBoxInfo.height);
         this.callAll("setColliderElements");
 
-        scene.physics.add.collider(this,this);
+        scene.physics.add.collider(this, this);
+    }
+
+    /**
+     * This method allows to call any desired class, as long as it exists.
+     * @param {String} className 
+     * @param {String} classParent 
+     * @returns {class}
+     */
+    __checkClassConstructor(className, classParent){
+        const classConstructor = eval(className);
+        const classParentConstructor = eval(classParent);
+        if (classParentConstructor) {
+            if (classConstructor && classConstructor.prototype instanceof classParentConstructor) {
+                return classConstructor;
+            }
+        }else if (classConstructor) {
+            return classConstructor;
+        } else {
+            throw new Error(`The class "${className}" isn't defined or itn't an instanse of "${classParent}".`);
+        }
     }
 
     callAllSoundPanning(player) {
@@ -261,10 +277,9 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
     /**
      * Sets the position of the enemy acording to the available spaces in the map.
      * @param {Number} wallNumberRatio
-     * @param {Number} enemyAngleOffset
-     * @returns {{x: Number, y: Number, angleOffset: Number}}
+     * @returns {{x: Number, y: Number}}
      */
-    setInitialPosition(wallNumberRatio, enemyAngleOffset) {
+    setInitialPosition(wallNumberRatio) {
         let enemyPosition = {x: 0, y: 0, angleOffset: 0};
 
         let i = getRndInteger(0, wallNumberRatio.y);
@@ -275,10 +290,8 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
             j = getRndInteger(0, wallNumberRatio.x);
         }
 
-        // this.wallMatrix[i][j] = true;
         enemyPosition.x = (j*32 + 32);
         enemyPosition.y = (i*32 + 32);
-        enemyPosition.angleOffset = enemyAngleOffset;
 
         return enemyPosition;
     }
