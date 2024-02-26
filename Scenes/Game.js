@@ -59,7 +59,7 @@ class Game extends Phaser.Scene{
             this.load.image(weapon.name, weapon.spriteDir);
         }
 
-        this.load.image("skeleton", "/assets/Enemy/Skeleton/Sprites/Idle.png");
+        this.load.image("skeleton", "./assets/Enemy/Skeleton/Sprites/Idle.png");
 
         let skeletonSounds = [
             {name: "Idle", amount: 3},
