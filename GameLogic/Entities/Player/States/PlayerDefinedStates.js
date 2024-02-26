@@ -26,7 +26,7 @@ class PlayerIdleState extends PlayerState{
             if(space.isDown){
                 this.player.getStateMachine().transitionToState('Jump');
             }else{
-                this.player.play(this.player.getSpriteAnimations("Idle").getAnimationName(), true);
+                this.player.play(this.player.getSpriteAnimations("Idle"), true);
             }
         }
 
@@ -84,7 +84,7 @@ class PlayerWalkState extends PlayerState{
             }else if(shift.isDown){
                 this.player.stateMachine.transitionToState("Run");
             }else{
-                this.player.play(this.player.getSpriteAnimations("Walk").getAnimationName(), true);
+                this.player.play(this.player.getSpriteAnimations("Walk"), true);
             }
         }
 
@@ -163,7 +163,7 @@ class PlayerRunState extends PlayerState{
                 this.player.setVelocityX(sign*(defaultVelocity*velocityMultiplier + slideDashAdder));
                 this.player.stateMachine.transitionToState("Slide");
             }else{
-                this.player.play(this.player.getSpriteAnimations("Run").getAnimationName(), true);
+                this.player.play(this.player.getSpriteAnimations("Run"), true);
             }
         }
         
@@ -213,7 +213,7 @@ class PlayerJumpState extends PlayerState{
 
     enterState(){
         this.player.setVelocityY(-600);
-        this.player.play(this.player.getSpriteAnimations("Jump").getAnimationName(), true);
+        this.player.play(this.player.getSpriteAnimations("Jump"), true);
     }
 
     updateState(){
@@ -288,7 +288,7 @@ class PlayerSlideState extends PlayerState{
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else{
-                this.player.play(this.player.getSpriteAnimations("Slide").getAnimationName(), true);
+                this.player.play(this.player.getSpriteAnimations("Slide"), true);
             }
         }
 
@@ -419,7 +419,7 @@ class PlayerDeadState extends PlayerState{
     }
 
     enterState(){
-        this.player.play(this.player.getSpriteAnimations("Dead").getAnimationName());
+        this.player.play(this.player.getSpriteAnimations("Dead"));
     }
 
     updateState(){

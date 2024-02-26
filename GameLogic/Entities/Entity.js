@@ -154,10 +154,23 @@ class Entity extends Sprite{
    setSpriteAnimations(animationsArray){
        this.animations = {};
 
-       for(let animation of animationsArray){
-           this.animations[animation.name] = new SpriteAnimation(this.getScene(), `${this.getSpriteImgStr()}_${animation.name}`);
-           this.animations[animation.name].setAnimationFrames(animation.animationParams.end, animation.animationParams.framerate, animation.animationParams.repeat);
-       }
+        for(let animation of animationsArray){
+                let fullNameAnim = `${this.getSpriteImgStr()}_${animation.name}`;
+            this.animations[animation.name] = fullNameAnim;
+            
+            if(!this.scene.anims.anims.entries[fullNameAnim]){
+                this.scene.anims.create({
+                    key: fullNameAnim,
+                    frames: this.scene.anims.generateFrameNames(fullNameAnim, {
+                        start: 1,
+                        end: animation.animationParams.end,
+                        prefix: fullNameAnim + "_",
+                    }),
+                    frameRate: animation.animationParams.framerate,
+                    repeat: animation.animationParams.repeat
+                });
+            }
+        }
    }
 
    getSpriteAnimations(element){
