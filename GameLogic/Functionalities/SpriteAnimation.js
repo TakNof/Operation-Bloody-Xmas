@@ -18,23 +18,25 @@ class SpriteAnimation{
      * @param {Number} repeat
      */
     setAnimationFrames(end, framerate, repeat = 0){
-        this.scene.anims.create({
-            key: this.getAnimationName(),
-            frames: this.scene.anims.generateFrameNames(this.spriteName, {
-                start: 1,
-                end: end,
-                prefix: this.spriteName + "_",
-            }),
-            frameRate: framerate,
-            repeat: repeat
-        });
+        if(!this.scene.anims.anims.entries[this.spriteName]){
+            this.scene.anims.create({
+                key: this.getAnimationName(),
+                frames: this.scene.anims.generateFrameNames(this.spriteName, {
+                    start: 1,
+                    end: end,
+                    prefix: this.spriteName + "_",
+                }),
+                frameRate: framerate,
+                repeat: repeat
+            });
+        }
     }
 
     /**
      * Sets the animation name.
      */
     setAnimationName(){
-        this.animationName =`${this.spriteName}`;
+        this.animationName = this.spriteName;
     }
 
     /**

@@ -23,13 +23,6 @@ class Player extends Living{
         this.setWeapons(config.weapons);
 
         this.pressedKeyHistory = [];
-        // this.setSpriteSounds("player", "hurt", "death", "heal");
-
-        // this.roundsShot = 0;
-        // this.damageDealed = 0;
-        // this.damageReceived = 0;
-        // this.lastSwitchWeaponTimer = 0;
-        // this.creationTime = this.getScene().time.now;
         this.lastSlideTimer = -config.slideCooldown;
 
         this.getScene().input.keyboard.on('keydown', (event) => {

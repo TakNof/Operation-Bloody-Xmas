@@ -191,15 +191,18 @@ class Living extends Entity{
             damageTimeSpan -= this.getDamagedTimeHistory()[i];
         }
 
-        let dodge = getRndInteger(1, 5) == 1;
+        let recovered = getRndInteger(1, 5) == 1;
 
-        this.isStunned = damageTimeSpan <= 50 && !dodge;
+        if(!this.isStunned){
+            this.isStunned = damageTimeSpan <= 50 && !recovered;
+        }
 
-        if(this.isStunned && !dodge){
+        if(!this.stunnedTimer && this.isStunned && !recovered){
             this.getScene().cameras.main.shake(100, 0.005);
 
             const stunnedText = this.createIndicativeText("stunned");
             let stunDuration = getRndInteger(1, 5)*1000;
+
             this.getScene().tweens.add({
                 targets: stunnedText,
                 y: stunnedText.y - 50,
@@ -227,26 +230,43 @@ class Living extends Entity{
             });
 
             this.stunnedTimer = setTimeout(() => {
-                this.isStunned = false;
-                this.clearTint();
-            }, stunDuration);
-        }
+                const recoveredText = this.createIndicativeText("recovered");
 
-        if(dodge){
-            const dodgeText = this.createIndicativeText("dodge");
+                this.getScene().tweens.add({
+                    targets: recoveredText,
+                    y: recoveredText.y - 50,
+                    alpha: 0,
+                    scaleX: 0.5,
+                    scaleY: 0.5,
+                    duration: 1000,
+                    ease: "Cubic",
+                    onComplete: () => {
+                        recoveredText.destroy();
+                    },
+                });
+
+                clearInterval(this.tintInterval);
+                clearTimeout(this.stunnedTimer);
+
+                this.isStunned = false;
+                this.clearTint();               
+            }, stunDuration);
             
-            this.getScene().tweens.add({
-                targets: dodgeText,
-                y: dodgeText.y - 50,
-                alpha: 0,
-                scaleX: 0.5,
-                scaleY: 0.5,
-                duration: 1000,
-                ease: "Cubic",
-                onComplete: () => {
-                    dodgeText.destroy();
-                },
-            });
+            let tinted = true;
+            this.tintInterval = setInterval(() => {
+                if(tinted){
+                    this.clearTint();
+                }else{
+                    this.setTint(0xc98ff7);
+                }
+
+                if(!this.isAlive){
+                    clearInterval(this.tintInterval);
+                    clearTimeout(this.stunnedTimer);
+                }
+
+                tinted = !tinted;
+            }, 100); 
         }
     }
 
@@ -275,5 +295,11 @@ class Living extends Entity{
 
         this.getScene().physics.add.existing(child, false);
         this.children.push(child);
+    }
+
+    destroyChildren(){
+        this.children.forEach(function(child){
+            child.destroy();
+        });
     }
 }

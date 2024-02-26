@@ -12,7 +12,7 @@ class Game extends Phaser.Scene{
         let controls = this.input.keyboard.createCursorKeys();
 
        for(let key of ["w", "a", "s", "d", "r", "shift", "space", "enter", "esc"]) {
-            controls[key.toLowerCase()] = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[key.toUpperCase()]);
+            controls[key] = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[key.toUpperCase()]);
         }
 
         const PineSword = {
@@ -86,9 +86,9 @@ class Game extends Phaser.Scene{
             maxHealth: 300,
             chaseDistance: 500,
             attackDistance: 100,
-            damage: 10,
+            damage: 5,
             attackDelay: 1000,
-            attackRate: 800,
+            attackRate: 850,
             hitFrame: 6,
             swordHitBoxInfo: {x: 50, y: 16, width: 50, height: 40},
             possibleStates: ["Idle", "Patrol", "Chase", "Search", "Attack", "Block", "Damaged","Stunned", "Dead"],
@@ -116,7 +116,7 @@ class Game extends Phaser.Scene{
         this.walls = new WallsBuilder(this, "wall", 32, 40, true, true);
         this.walls.createWalls();
 
-        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.8}, this.playerConfig);
+        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.45}, this.playerConfig);
         this.player.setRaycaster(1);
         
         this.playerText = this.add.text(100, 420, `${this.player.health}`, {
@@ -134,7 +134,7 @@ class Game extends Phaser.Scene{
         this.walls.setColliders(this.player, this.skeletons);
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
-        this.cameras.main.setZoom(0.5, 1);
+        // this.cameras.main.setZoom(0.5, 1);
         this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
        
 

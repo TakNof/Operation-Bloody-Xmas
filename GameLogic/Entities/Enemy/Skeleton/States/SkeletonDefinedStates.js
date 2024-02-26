@@ -9,7 +9,13 @@ class SkeletonIdleState extends EnemyState{
     }
 
     enterState(){
-        this.soundConfig = `Idle_${getRndInteger(1, 3)}`;
+        if(getRndInteger(1, 10) == 1){
+            this.soundConfig = `Idle_${getRndInteger(1, 3)}`;
+            if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
+                this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
+            }
+        }
+        
         this.timeout = setTimeout(() =>{
             this.enemy.getStateMachine().transitionToState("Patrol");
         
@@ -19,9 +25,6 @@ class SkeletonIdleState extends EnemyState{
     updateState(){
         this.enemy.setVelocityX(0);
         this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
-        if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
-            this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
-        }
         
         if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && this.enemy.getScene().player.isAlive){
             clearTimeout(this.timeout);
@@ -204,7 +207,7 @@ class SkeletonSearchState extends EnemyState{
 
             this.enemy.setVelocityX(0);
             this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
-            if(!this.enemy.getSpriteSounds(this.soundConfig1).sound.isPlaying){
+            if(!this.enemy.getSpriteSounds(this.soundConfig1).sound.isPlaying && getRndInteger(1, 10) == 1){
                 this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
             }
             
@@ -284,9 +287,7 @@ class SkeletonAttackState extends EnemyState{
 
         if(this.idleAnim){
             this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
-            if(!this.enemy.getSpriteSounds(this.soundConfig1).sound.isPlaying){
-                this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
-            }
+            
         }
         
         this.enemy.flipX = player.getPositionX() < this.enemy.getPositionX();
@@ -476,6 +477,7 @@ class SkeletonStunnedState extends EnemyState{
     enterState(){}
 
     updateState(){
+        this.enemy.setVelocityX(0);
         this.enemy.play(this.enemy.getSpriteAnimations("Idle").getAnimationName(), true);
         if(!this.enemy.isStunned){
             this.enemy.getStateMachine().transitionToState("Patrol");
@@ -534,6 +536,7 @@ class SkeletonDeadState extends EnemyState{
                 duration: 5000,
                 ease: "Cubic",
                 onComplete: () => {
+                    this.enemy.destroyChildren();
                     this.enemy.destroy();
                 },
             });
