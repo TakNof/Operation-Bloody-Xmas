@@ -1,7 +1,7 @@
 {
     "frames": [
         {
-            "filename": "skeleton_Walk_1",
+            "filename": "skeleton_Walk_0",
             "frame": {
                 "w": 149,
                 "h": 105,
@@ -14,7 +14,7 @@
             }
         },
         {
-            "filename": "skeleton_Walk_2",
+            "filename": "skeleton_Walk_1",
             "frame": {
                 "w": 149,
                 "h": 105,
@@ -27,7 +27,7 @@
             }
         },
         {
-            "filename": "skeleton_Walk_3",
+            "filename": "skeleton_Walk_2",
             "frame": {
                 "w": 149,
                 "h": 105,
@@ -40,7 +40,7 @@
             }
         },
         {
-            "filename": "skeleton_Walk_4",
+            "filename": "skeleton_Walk_3",
             "frame": {
                 "w": 149,
                 "h": 105,

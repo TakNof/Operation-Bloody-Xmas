@@ -1,10 +1,10 @@
 {
     "frames": [
         {
-            "filename": "player_Jump_0",
+            "filename": "player_Land_0",
             "frame": {
-                "w": 133,
-                "h": 138,
+                "w": 122,
+                "h": 139,
                 "x": 0,
                 "y": 0
             },
@@ -14,11 +14,11 @@
             }
         },
         {
-            "filename": "player_Jump_1",
+            "filename": "player_Land_1",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 133,
+                "w": 122,
+                "h": 139,
+                "x": 122,
                 "y": 0
             },
             "anchor": {
@@ -27,12 +27,12 @@
             }
         },
         {
-            "filename": "player_Jump_2",
+            "filename": "player_Land_2",
             "frame": {
-                "w": 133,
-                "h": 138,
+                "w": 122,
+                "h": 139,
                 "x": 0,
-                "y": 138
+                "y": 139
             },
             "anchor": {
                 "x": 0.5,
@@ -40,12 +40,12 @@
             }
         },
         {
-            "filename": "player_Jump_3",
+            "filename": "player_Land_3",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 133,
-                "y": 138
+                "w": 122,
+                "h": 139,
+                "x": 122,
+                "y": 139
             },
             "anchor": {
                 "x": 0.5,
@@ -53,11 +53,11 @@
             }
         },
         {
-            "filename": "player_Jump_4",
+            "filename": "player_Land_4",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 266,
+                "w": 122,
+                "h": 139,
+                "x": 244,
                 "y": 0
             },
             "anchor": {
@@ -66,12 +66,12 @@
             }
         },
         {
-            "filename": "player_Jump_5",
+            "filename": "player_Land_5",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 266,
-                "y": 138
+                "w": 122,
+                "h": 139,
+                "x": 244,
+                "y": 139
             },
             "anchor": {
                 "x": 0.5,
@@ -79,12 +79,12 @@
             }
         },
         {
-            "filename": "player_Jump_6",
+            "filename": "player_Land_6",
             "frame": {
-                "w": 133,
-                "h": 138,
+                "w": 122,
+                "h": 139,
                 "x": 0,
-                "y": 276
+                "y": 278
             },
             "anchor": {
                 "x": 0.5,
@@ -92,12 +92,12 @@
             }
         },
         {
-            "filename": "player_Jump_7",
+            "filename": "player_Land_7",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 133,
-                "y": 276
+                "w": 122,
+                "h": 139,
+                "x": 122,
+                "y": 278
             },
             "anchor": {
                 "x": 0.5,
@@ -105,12 +105,12 @@
             }
         },
         {
-            "filename": "player_Jump_8",
+            "filename": "player_Land_8",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 266,
-                "y": 276
+                "w": 122,
+                "h": 139,
+                "x": 244,
+                "y": 278
             },
             "anchor": {
                 "x": 0.5,
@@ -118,11 +118,11 @@
             }
         },
         {
-            "filename": "player_Jump_9",
+            "filename": "player_Land_9",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 399,
+                "w": 122,
+                "h": 139,
+                "x": 366,
                 "y": 0
             },
             "anchor": {
@@ -131,12 +131,12 @@
             }
         },
         {
-            "filename": "player_Jump_10",
+            "filename": "player_Land_10",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 399,
-                "y": 138
+                "w": 122,
+                "h": 139,
+                "x": 366,
+                "y": 139
             },
             "anchor": {
                 "x": 0.5,
@@ -144,12 +144,12 @@
             }
         },
         {
-            "filename": "player_Jump_11",
+            "filename": "player_Land_11",
             "frame": {
-                "w": 133,
-                "h": 138,
-                "x": 399,
-                "y": 276
+                "w": 122,
+                "h": 139,
+                "x": 366,
+                "y": 278
             },
             "anchor": {
                 "x": 0.5,

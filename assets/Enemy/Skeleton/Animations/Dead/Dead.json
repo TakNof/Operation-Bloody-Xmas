@@ -1,7 +1,7 @@
 {
     "frames": [
         {
-            "filename": "skeleton_Dead_1",
+            "filename": "skeleton_Dead_0",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -14,7 +14,7 @@
             }
         },
         {
-            "filename": "skeleton_Dead_2",
+            "filename": "skeleton_Dead_1",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -27,7 +27,7 @@
             }
         },
         {
-            "filename": "skeleton_Dead_3",
+            "filename": "skeleton_Dead_0",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -40,7 +40,7 @@
             }
         },
         {
-            "filename": "skeleton_Dead_4",
+            "filename": "skeleton_Dead_3",
             "frame": {
                 "w": 150,
                 "h": 105,

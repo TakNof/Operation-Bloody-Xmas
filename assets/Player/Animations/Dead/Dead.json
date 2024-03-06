@@ -1,7 +1,7 @@
 {
     "frames": [
         {
-            "filename": "player_Dead_1",
+            "filename": "player_Dead_0",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -14,7 +14,7 @@
             }
         },
         {
-            "filename": "player_Dead_2",
+            "filename": "player_Dead_1",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -27,7 +27,7 @@
             }
         },
         {
-            "filename": "player_Dead_3",
+            "filename": "player_Dead_2",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -40,7 +40,7 @@
             }
         },
         {
-            "filename": "player_Dead_4",
+            "filename": "player_Dead_3",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -53,7 +53,7 @@
             }
         },
         {
-            "filename": "player_Dead_5",
+            "filename": "player_Dead_4",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -66,7 +66,7 @@
             }
         },
         {
-            "filename": "player_Dead_6",
+            "filename": "player_Dead_5",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -79,7 +79,7 @@
             }
         },
         {
-            "filename": "player_Dead_7",
+            "filename": "player_Dead_6",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -92,7 +92,7 @@
             }
         },
         {
-            "filename": "player_Dead_8",
+            "filename": "player_Dead_7",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -105,7 +105,7 @@
             }
         },
         {
-            "filename": "player_Dead_9",
+            "filename": "player_Dead_8",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -118,7 +118,7 @@
             }
         },
         {
-            "filename": "player_Dead_10",
+            "filename": "player_Dead_9",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -131,7 +131,7 @@
             }
         },
         {
-            "filename": "player_Dead_11",
+            "filename": "player_Dead_10",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -144,7 +144,7 @@
             }
         },
         {
-            "filename": "player_Dead_12",
+            "filename": "player_Dead_11",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -157,7 +157,7 @@
             }
         },
         {
-            "filename": "player_Dead_13",
+            "filename": "player_Dead_12",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -170,7 +170,7 @@
             }
         },
         {
-            "filename": "player_Dead_14",
+            "filename": "player_Dead_13",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -183,7 +183,7 @@
             }
         },
         {
-            "filename": "player_Dead_15",
+            "filename": "player_Dead_14",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -196,7 +196,7 @@
             }
         },
         {
-            "filename": "player_Dead_16",
+            "filename": "player_Dead_15",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,
@@ -209,7 +209,7 @@
             }
         },
         {
-            "filename": "player_Dead_17",
+            "filename": "player_Dead_16",
             "frame": {
                 "w": 280.2,
                 "h": 192.29999999999998,

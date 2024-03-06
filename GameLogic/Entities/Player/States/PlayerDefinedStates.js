@@ -9,7 +9,7 @@ class PlayerIdleState extends PlayerState{
     }
 
     enterState(){}
-
+        
     updateState(){
 
         const {a, d, left, right, shift, space} = this.player.config.controls;
@@ -22,12 +22,17 @@ class PlayerIdleState extends PlayerState{
             this.player.getStateMachine().transitionToState('Walk');
         }
         
-        if(this.player.body.onFloor()){
+        if(this.player.body.onFloor() && !this.player.isLanding){
             if(space.isDown){
                 this.player.getStateMachine().transitionToState('Jump');
             }else{
                 this.player.play(this.player.getSpriteAnimations("Idle"), true);
+                this.player.setOwnSize(this.player.getSize());
             }
+        }
+
+        if(this.player.getVelocityY() > 800){
+            this.player.getStateMachine().transitionToState('Fall');
         }
 
         this.updateChildren();
@@ -78,7 +83,7 @@ class PlayerWalkState extends PlayerState{
             this.player.stateMachine.transitionToState('Idle');
         }
 
-        if(this.player.body.onFloor()){
+        if(this.player.body.onFloor() && !this.player.isLanding){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else if(shift.isDown){
@@ -87,11 +92,17 @@ class PlayerWalkState extends PlayerState{
                 this.player.play(this.player.getSpriteAnimations("Walk"), true);
             }
         }
-
-        if(left.isDown || a.isDown){
+        
+        if(this.player.getVelocityY() > 800){
+            this.player.getStateMachine().transitionToState('Fall');
+        }
+        
+        if(left.isDown ^ a.isDown  && !this.player.flipX){
             this.player.flipX= true;
-        }else if(right.isDown || d.isDown){
+            this.player.setOwnSize(this.player.getSize());
+        }else if(right.isDown ^ d.isDown && this.player.flipX){
             this.player.flipX= false;
+            this.player.setOwnSize(this.player.getSize());
         }
 
         let sign = this.player.flipX ? -1: 1;
@@ -143,18 +154,19 @@ class PlayerRunState extends PlayerState{
         const {a, s, d, left, down, right, shift, space} = this.player.config.controls;
         const {defaultVelocity, velocityMultiplier, slideCooldown, slideDashAdder} = this.player.config;
 
-        if(left.isDown || a.isDown){
+        if(left.isDown ^ a.isDown  && !this.player.flipX){
             this.player.flipX= true;
-
-        }else if(right.isDown || d.isDown){
+            this.player.setOwnSize(this.player.getSize());
+        }else if(right.isDown ^ d.isDown && this.player.flipX){
             this.player.flipX= false;
+            this.player.setOwnSize(this.player.getSize());
         }
 
         let sign = this.player.flipX ? -1: 1;
 
         this.player.setVelocityX(sign*defaultVelocity*velocityMultiplier);
 
-        if(this.player.body.onFloor()){
+        if(this.player.body.onFloor() && !this.player.isLanding){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else if(down.isDown ^ s.isDown && scene.time.now - this.player.lastSlideTimer >= slideCooldown){
@@ -165,6 +177,10 @@ class PlayerRunState extends PlayerState{
             }else{
                 this.player.play(this.player.getSpriteAnimations("Run"), true);
             }
+        }
+        
+        if(this.player.getVelocityY() > 800){
+            this.player.getStateMachine().transitionToState('Fall');
         }
         
         if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
@@ -212,19 +228,125 @@ class PlayerJumpState extends PlayerState{
     }
 
     enterState(){
-        this.player.setVelocityY(-600);
+        this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
         this.player.play(this.player.getSpriteAnimations("Jump"), true);
+        this.player.on(`animationupdate`, (anim, frame) =>{
+            if(frame.index == this.player.config.jumpFrame){
+                
+                this.player.setOffset(this.player.width*this.player.originX, 0);
+                this.player.setOwnSize(this.player.getSize());
+                this.player.setVelocityY(-600);
+                this.player.off("animationupdate");
+            }
+        });
+        
     }
 
     updateState(){
-        if(this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2] === "Run"){
-            this.player.stateMachine.transitionToState("Run");
-        }else{
-            this.player.stateMachine.transitionToState("Walk");
-        }
+        this.player.getStateMachine().transitionToState(this.previousStateStr);
     }
 
     exitState(){}
+
+    getNextState(){
+        return this.stateKey;
+    }
+
+    /**
+     * 
+     * @param {Object} other The object which has entered the trigger. 
+     */
+    onTriggerEnter(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which is staying the trigger. 
+     */
+    onTriggerStay(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which has exited the trigger. 
+     */
+    onTriggerExit(other){}
+}
+
+class PlayerFallState extends PlayerState{
+    /**
+     * 
+     * @param {Player} player The object which will provide the context for the player states.
+     * @param {Object} key
+     */
+    constructor(player, key){
+        super(player, key);
+    }
+
+    enterState(){
+        this.player.play(this.player.getSpriteAnimations("Fall"), true);
+
+        this.player.setOffset(this.player.width*this.player.originX, 0);
+        this.player.setOwnSize(this.player.getSize());
+    }
+
+    updateState(){
+        if(this.player.body.onFloor()){
+            this.player.stop();
+            this.player.getStateMachine().transitionToState("Land");
+        }
+        this.updateChildren();
+    }
+
+    exitState(){}
+
+    getNextState(){
+        return this.stateKey;
+    }
+
+    /**
+     * 
+     * @param {Object} other The object which has entered the trigger. 
+     */
+    onTriggerEnter(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which is staying the trigger. 
+     */
+    onTriggerStay(other){}
+
+    /**
+     * 
+     * @param {Object} other The object which has exited the trigger. 
+     */
+    onTriggerExit(other){}
+}
+
+class PlayerLandState extends PlayerState{
+    /**
+     * 
+     * @param {Player} player The object which will provide the context for the player states.
+     * @param {Object} key
+     */
+    constructor(player, key){
+        super(player, key);
+    }
+
+    enterState(){
+        this.player.isLanding = true;
+        this.player.play(this.player.getSpriteAnimations("Land"));
+        this.player.setOffset(this.player.width*this.player.originX, 0);
+        this.player.setOwnSize(this.player.getSize());
+
+        this.player.getStateMachine().transitionToState("Idle");
+    }
+
+    updateState(){
+        this.updateChildren();
+    }
+
+    exitState(){
+        this.player.isLanding = false;
+    }
 
     getNextState(){
         return this.stateKey;
@@ -284,7 +406,7 @@ class PlayerSlideState extends PlayerState{
             this.player.setVelocityX(this.player.getVelocityX() - sign*10);
         }
 
-        if(this.player.body.onFloor()){
+        if(this.player.body.onFloor() && !this.player.isLanding){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else{

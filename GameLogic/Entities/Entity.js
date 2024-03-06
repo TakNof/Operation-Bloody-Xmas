@@ -20,8 +20,6 @@ class Entity extends Sprite{
        scene.physics.add.existing(this, false);
        this.setOwnSize(size);
        this.setCollideWorldBounds(true);
-
-       this.playingAnimAndAudio = false;
    }
 
    /**
@@ -139,42 +137,46 @@ class Entity extends Sprite{
     * @param {String} element The name of the sound to retrieve.
     * @returns {Sound}
     */
-   getSpriteSounds(element){
-       if(!element){
-           return this.spriteSounds;
-       }else{
-           return this.spriteSounds[element];
-       }
-   }
+    getSpriteSounds(element){
+        if(!element){
+            return this.spriteSounds;
+        }else{
+            return this.spriteSounds[element];
+        }
+    }
 
    /**
     * Sets the animations of the living element.
     * @param {Array<String>} animationsArray 
     */
-   setSpriteAnimations(animationsArray){
-       this.animations = {};
+    setSpriteAnimations(animationsArray){
+        this.animations = {};
 
-        for(let animation of animationsArray){
-                let fullNameAnim = `${this.getSpriteImgStr()}_${animation.name}`;
-            this.animations[animation.name] = fullNameAnim;
-            
-            if(!this.scene.anims.anims.entries[fullNameAnim]){
-                this.scene.anims.create({
-                    key: fullNameAnim,
-                    frames: this.scene.anims.generateFrameNames(fullNameAnim, {
-                        start: 1,
-                        end: animation.animationParams.end,
-                        prefix: fullNameAnim + "_",
-                    }),
-                    frameRate: animation.animationParams.framerate,
-                    repeat: animation.animationParams.repeat
-                });
+            for(let animation of animationsArray){
+                    let fullNameAnim = `${this.getSpriteImgStr()}_${animation.name}`;
+                this.animations[animation.name] = fullNameAnim;
+                
+                if(!this.scene.anims.anims.entries[fullNameAnim]){
+                    this.scene.anims.create({
+                        key: fullNameAnim,
+                        frames: this.scene.anims.generateFrameNames(fullNameAnim, {
+                            start: 0,
+                            end: animation.animationParams.end,
+                            prefix: fullNameAnim + "_",
+                        }),
+                        frameRate: animation.animationParams.framerate,
+                        repeat: animation.animationParams.repeat
+                    });
+                }
             }
-        }
-   }
-
-   getSpriteAnimations(element){
-       return this.animations[element];
+    }
+    /**
+     * 
+     * @param {String} animation 
+     * @returns animationName
+     */
+   getSpriteAnimations(animation){
+       return this.animations[animation];
    }
 
    /**
@@ -183,35 +185,35 @@ class Entity extends Sprite{
     * @param {Number} amountSounds 
     * @param {Number} frameReproSound 
     */
-   playAnimationAndSound(namesList, amountSounds = 1, frameReproSound = 1){
-        if(!this.playingAnimAndAudio){
-            this.playingAnimAndAudio = true;
-            if(!namesList[1]) namesList[1] = namesList[0];   
+    // playAnimationAndSound(namesList, amountSounds = 1, frameReproSound = 1){
+    //         if(!this.playingAnimAndAudio){
+    //             this.playingAnimAndAudio = true;
+    //             if(!namesList[1]) namesList[1] = namesList[0];   
 
-            let animationConfig = this.getSpriteAnimations(namesList[0]).getAnimationName();
-            this.play(animationConfig, true);
+    //             let animationConfig = this.getSpriteAnimations(namesList[0]).getAnimationName();
+    //             this.play(animationConfig, true);
 
-            let handleAnimAudioSync = function(anim, frame){
-                if (frameReproSound < frame.index || anim.key !== animationConfig) {
-                    return;
-                }
-                
-                let soundConfig = amountSounds == 1 ? namesList[1] : `${namesList[1]}_${getRndInteger(1, amountSounds)}`;
-                // console.log(this.getSpriteSounds(soundConfig).sound);    
-                if(!this.getSpriteSounds(soundConfig).sound.isPlaying){
-                    console.log("playing sound: " + soundConfig);
-                    this.getSpriteSounds(soundConfig).playSound(this.getPosition());
-                }
-        
-                if(this.getSpriteSounds(soundConfig).sound.hasEnded){
-                    this.getSpriteSounds(soundConfig).stopSound();
-                }
-        
-                this.off(`animationupdate`, handleAnimAudioSync);
-            }
+    //             let handleAnimAudioSync = function(anim, frame){
+    //                 if (frameReproSound < frame.index || anim.key !== animationConfig) {
+    //                     return;
+    //                 }
+                    
+    //                 let soundConfig = amountSounds == 1 ? namesList[1] : `${namesList[1]}_${getRndInteger(1, amountSounds)}`;
+    //                 // console.log(this.getSpriteSounds(soundConfig).sound);    
+    //                 if(!this.getSpriteSounds(soundConfig).sound.isPlaying){
+    //                     console.log("playing sound: " + soundConfig);
+    //                     this.getSpriteSounds(soundConfig).playSound(this.getPosition());
+    //                 }
+            
+    //                 if(this.getSpriteSounds(soundConfig).sound.hasEnded){
+    //                     this.getSpriteSounds(soundConfig).stopSound();
+    //                 }
+            
+    //                 this.off(`animationupdate`, handleAnimAudioSync);
+    //             }
 
-            this.on("animationstart", handleAnimAudioSync);
-            this.playingAnimAndAudio = false;
-        }        
-    }
+    //             this.on("animationstart", handleAnimAudioSync);
+    //             this.playingAnimAndAudio = false;
+    //         }        
+    //     }
 }

@@ -1,7 +1,7 @@
 {
     "frames": [
         {
-            "filename": "skeleton_Damaged_1",
+            "filename": "skeleton_Damaged_0",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -14,7 +14,7 @@
             }
         },
         {
-            "filename": "skeleton_Damaged_2",
+            "filename": "skeleton_Damaged_1",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -27,7 +27,7 @@
             }
         },
         {
-            "filename": "skeleton_Damaged_3",
+            "filename": "skeleton_Damaged_2",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -40,7 +40,7 @@
             }
         },
         {
-            "filename": "skeleton_Damaged_4",
+            "filename": "skeleton_Damaged_3",
             "frame": {
                 "w": 150,
                 "h": 105,

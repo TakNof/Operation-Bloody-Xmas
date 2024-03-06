@@ -8,8 +8,7 @@ class Skeleton extends Enemy{
     */
     constructor(scene, originInfo, config){
         super(scene, originInfo, config);
-
-        this.setOffset(70, 50)
+        this.setOffset(this.width - this.body.width - 65, this.height - this.body.height - 5); 
     }
 
     onWallFound(){
@@ -21,7 +20,7 @@ class Skeleton extends Enemy{
     createSwordHitBox(x, y, width, height){
         this.swordHitBox = this.getScene().add.rectangle(x, y, width, height, 0xffffff, 0);
         this.getScene().physics.add.existing(this.swordHitBox, false);
-        this.swordHitBox.body.setGravityY(0);
+        this.swordHitBox.body.setAllowGravity(false);
         this.swordHitBox.body.enable = false;
         
         this.addChild(this.swordHitBox);

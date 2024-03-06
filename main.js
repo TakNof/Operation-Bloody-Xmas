@@ -24,29 +24,6 @@ let config = {
     }
 }
 
-const colors = {
-    limeGreen: "0x00ff00",
-    DarkGreen : "0x004200",
-    black: "0x000000",
-    crimsonRed: "0xDC143C",
-    sapphireBlue: "0x0F52BA"
-};
-
-
-let options = {
-    quality: {
-        setting: 1,
-        value: 64
-    },
-    renderDistance: {
-        setting: 1,
-        value: 40
-    },
-    difficulty: {
-        setting: 1
-    }
-}
-
 const game = new Phaser.Game(config);
 
 /**

@@ -1,0 +1,112 @@
+{
+    "frames": [
+        {
+            "filename": "player_Fall_0",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 0,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_1",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 120,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_2",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 0,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_3",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 120,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_4",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 240,
+                "y": 0
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_5",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 240,
+                "y": 140
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_6",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 0,
+                "y": 280
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "player_Fall_7",
+            "frame": {
+                "w": 120,
+                "h": 140,
+                "x": 120,
+                "y": 280
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        }
+    ],
+    "meta": {
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
+    }
+}

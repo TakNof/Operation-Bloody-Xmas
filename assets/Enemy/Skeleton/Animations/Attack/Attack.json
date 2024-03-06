@@ -1,7 +1,7 @@
 {
     "frames": [
         {
-            "filename": "skeleton_Attack_1",
+            "filename": "skeleton_Attack_0",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -14,12 +14,25 @@
             }
         },
         {
-            "filename": "skeleton_Attack_2",
+            "filename": "skeleton_Attack_1",
             "frame": {
                 "w": 150,
                 "h": 105,
                 "x": 0,
                 "y": 105
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
+            "filename": "skeleton_Attack_2",
+            "frame": {
+                "w": 150,
+                "h": 105,
+                "x": 150,
+                "y": 0
             },
             "anchor": {
                 "x": 0.5,
@@ -32,19 +45,6 @@
                 "w": 150,
                 "h": 105,
                 "x": 150,
-                "y": 0
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "skeleton_Attack_4",
-            "frame": {
-                "w": 150,
-                "h": 105,
-                "x": 150,
                 "y": 105
             },
             "anchor": {
@@ -53,7 +53,7 @@
             }
         },
         {
-            "filename": "skeleton_Attack_5",
+            "filename": "skeleton_Attack_4",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -66,7 +66,7 @@
             }
         },
         {
-            "filename": "skeleton_Attack_6",
+            "filename": "skeleton_Attack_5",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -79,7 +79,7 @@
             }
         },
         {
-            "filename": "skeleton_Attack_7",
+            "filename": "skeleton_Attack_6",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -92,7 +92,7 @@
             }
         },
         {
-            "filename": "skeleton_Attack_8",
+            "filename": "skeleton_Attack_7",
             "frame": {
                 "w": 150,
                 "h": 105,
@@ -106,7 +106,7 @@
         }
     ],
     "meta": {
-        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "description": "Atlas generado con Atlas Packer Gamma V1",
         "web": "https://gammafp.github.io/atlas-packer-phaser/"
     }
 }
