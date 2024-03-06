@@ -40,6 +40,7 @@ class Game extends GeneralGameScene{
     update(time, delta){
         this.player.update();
         this.skeletons.callAll("update");
+        // console.log(this.player.isLanding);
         // this.skeleton.update();
 
         this.playerText.x = this.player.x - 50;

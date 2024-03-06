@@ -84,6 +84,7 @@ class PlayerWalkState extends PlayerState{
         }
 
         if(this.player.body.onFloor() && !this.player.isLanding){
+            console.log("on floor")
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else if(shift.isDown){
@@ -231,20 +232,20 @@ class PlayerJumpState extends PlayerState{
         this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
         this.player.play(this.player.getSpriteAnimations("Jump"), true);
         this.player.on(`animationupdate`, (anim, frame) =>{
-            if(frame.index == this.player.config.jumpFrame){
+            if(frame.index == this.player.config.jumpFrame && anim.key === this.player.getSpriteAnimations("Jump")){
                 
                 this.player.setOffset(this.player.width*this.player.originX, 0);
                 this.player.setOwnSize(this.player.getSize());
                 this.player.setVelocityY(-600);
                 this.player.off("animationupdate");
+
+                this.player.getStateMachine().transitionToState(this.previousStateStr);
             }
         });
         
     }
 
-    updateState(){
-        this.player.getStateMachine().transitionToState(this.previousStateStr);
-    }
+    updateState(){}
 
     exitState(){}
 
@@ -384,15 +385,23 @@ class PlayerSlideState extends PlayerState{
     enterState(){
         this.player.setFrictionX(1);
         this.previousSize = this.player.getSize();
-        this.player.setOwnSize({x: 128, y: 64})
+        // for(let i = 0; i < 24; i++){
+        //     if(this.player.flipX){
+        //         this.player.body.setOffset(i*4,100);
+        //     }else{
+        //         this.player.body.setOffset(i,100);
+        //     }
+        // }
 
-        for(let i = 0; i < 24; i++){
-            if(this.player.flipX){
-                this.player.body.setOffset(i*4,100);
-            }else{
-                this.player.body.setOffset(i,100);
+        this.player.on(`animationupdate`, (anim, frame) =>{
+            if(frame.index == this.player.config.slideFrame){
+                
+                this.player.setOffset(0, this.player.height*this.player.originY);
+                this.player.setOwnSize({x: 128, y: 64});
+                this.player.setVelocityY(-600);
+                this.player.off("animationupdate");
             }
-        }
+        });
     }
 
     updateState(){

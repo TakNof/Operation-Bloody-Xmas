@@ -1,10 +1,10 @@
 {
     "frames": [
         {
-            "filename": "player_Slide_1",
+            "filename": "player_Slide_0",
             "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
+                "w": 146,
+                "h": 136,
                 "x": 0,
                 "y": 0
             },
@@ -14,12 +14,25 @@
             }
         },
         {
+            "filename": "player_Slide_1",
+            "frame": {
+                "w": 146,
+                "h": 136,
+                "x": 0,
+                "y": 136
+            },
+            "anchor": {
+                "x": 0.5,
+                "y": 0.5
+            }
+        },
+        {
             "filename": "player_Slide_2",
             "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 192.29999999999998
+                "w": 146,
+                "h": 136,
+                "x": 146,
+                "y": 0
             },
             "anchor": {
                 "x": 0.5,
@@ -29,10 +42,10 @@
         {
             "filename": "player_Slide_3",
             "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 384.59999999999997
+                "w": 146,
+                "h": 136,
+                "x": 146,
+                "y": 136
             },
             "anchor": {
                 "x": 0.5,
@@ -42,10 +55,10 @@
         {
             "filename": "player_Slide_4",
             "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
+                "w": 146,
+                "h": 136,
                 "x": 0,
-                "y": 576.9
+                "y": 272
             },
             "anchor": {
                 "x": 0.5,
@@ -55,88 +68,10 @@
         {
             "filename": "player_Slide_5",
             "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 769.1999999999999
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "player_Slide_6",
-            "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 961.5
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "player_Slide_7",
-            "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 1153.8
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "player_Slide_8",
-            "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 1346.1
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "player_Slide_9",
-            "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 1538.3999999999999
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "player_Slide_10",
-            "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 1730.7
-            },
-            "anchor": {
-                "x": 0.5,
-                "y": 0.5
-            }
-        },
-        {
-            "filename": "player_Slide_11",
-            "frame": {
-                "w": 280.2,
-                "h": 192.29999999999998,
-                "x": 0,
-                "y": 1923
+                "w": 146,
+                "h": 136,
+                "x": 146,
+                "y": 272
             },
             "anchor": {
                 "x": 0.5,
@@ -145,7 +80,7 @@
         }
     ],
     "meta": {
-        "description": "player_Atlas generado con Atlas Packer Gamma V2",
-        "web": "player_https://gammafp.github.io/atlas-packer-phaser/"
+        "description": "Atlas generado con Atlas Packer Gamma V2",
+        "web": "https://gammafp.github.io/atlas-packer-phaser/"
     }
 }
