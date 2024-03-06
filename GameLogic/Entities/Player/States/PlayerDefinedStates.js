@@ -229,16 +229,24 @@ class PlayerJumpState extends PlayerState{
 
     enterState(){
         this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
-        console.log(this.previousStateStr)
         this.player.play(this.player.getSpriteAnimations("Jump"), true);
-        this.ableToChange = false;
         this.player.on(`animationupdate`, (anim, frame) =>{
+            if(this.player.body.touching.up){
+                this.player.stop();
+                return;
+            }
+
             if(frame.index == this.player.config.jumpFrame && anim.key === this.player.getSpriteAnimations("Jump")){
-                this.ableToChange = true;
+                this.ableToChange = false;
+                
                 this.player.setOffset(this.player.width*this.player.originX, 0);
                 this.player.setOwnSize(this.player.getSize());
+                
                 this.player.setVelocityY(-600);
+
                 this.player.off("animationupdate");
+                this.ableToChange = true;
+
                 
             }
         });
@@ -248,8 +256,6 @@ class PlayerJumpState extends PlayerState{
     updateState(){
         if(this.ableToChange){
             this.player.getStateMachine().transitionToState(this.previousStateStr);
-
-            console.log("changing state");
         }
         this.updateChildren();
         
@@ -404,9 +410,8 @@ class PlayerSlideState extends PlayerState{
         this.player.on(`animationupdate`, (anim, frame) =>{
             if(frame.index == this.player.config.slideFrame){
                 
-                this.player.setOffset(0, this.player.height*this.player.originY);
+                this.player.setOffset(0, this.player.originY*1.2);
                 this.player.setOwnSize({x: 128, y: 64});
-                this.player.setVelocityY(-600);
                 this.player.off("animationupdate");
             }
         });
