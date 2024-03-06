@@ -43,7 +43,7 @@ class GeneralGameScene extends Phaser.Scene{
                 {name: "Jump", animationParams: {end: 11, framerate: 15}},
                 {name: "Fall", animationParams: {end: 5, framerate: 12, repeat: -1}},
                 {name: "Land", animationParams: {end: 11, framerate: 20,}},
-                {name: "Slide", animationParams: {end: 6, framerate: 15}},
+                {name: "Slide", animationParams: {end: 5, framerate: 15}},
                 {name: "Dead", animationParams: {end: 17, framerate: 20}}
             ],
             controls: controls,

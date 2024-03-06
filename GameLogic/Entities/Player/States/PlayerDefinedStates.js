@@ -84,7 +84,6 @@ class PlayerWalkState extends PlayerState{
         }
 
         if(this.player.body.onFloor() && !this.player.isLanding){
-            console.log("on floor")
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else if(shift.isDown){
@@ -230,22 +229,31 @@ class PlayerJumpState extends PlayerState{
 
     enterState(){
         this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
+        console.log(this.previousStateStr)
         this.player.play(this.player.getSpriteAnimations("Jump"), true);
+        this.ableToChange = false;
         this.player.on(`animationupdate`, (anim, frame) =>{
             if(frame.index == this.player.config.jumpFrame && anim.key === this.player.getSpriteAnimations("Jump")){
-                
+                this.ableToChange = true;
                 this.player.setOffset(this.player.width*this.player.originX, 0);
                 this.player.setOwnSize(this.player.getSize());
                 this.player.setVelocityY(-600);
                 this.player.off("animationupdate");
-
-                this.player.getStateMachine().transitionToState(this.previousStateStr);
+                
             }
         });
         
     }
 
-    updateState(){}
+    updateState(){
+        if(this.ableToChange){
+            this.player.getStateMachine().transitionToState(this.previousStateStr);
+
+            console.log("changing state");
+        }
+        this.updateChildren();
+        
+    }
 
     exitState(){}
 
