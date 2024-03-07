@@ -231,23 +231,26 @@ class PlayerJumpState extends PlayerState{
         this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
         this.player.play(this.player.getSpriteAnimations("Jump"), true);
         this.player.on(`animationupdate`, (anim, frame) =>{
-            if(this.player.body.touching.up){
-                this.player.stop();
-                return;
-            }
 
-            if(frame.index == this.player.config.jumpFrame && anim.key === this.player.getSpriteAnimations("Jump")){
-                this.ableToChange = false;
-                
-                this.player.setOffset(this.player.width*this.player.originX, 0);
-                this.player.setOwnSize(this.player.getSize());
-                
-                this.player.setVelocityY(-600);
-
-                this.player.off("animationupdate");
-                this.ableToChange = true;
-
-                
+            if(anim.key === this.player.getSpriteAnimations("Jump")){
+                if(this.player.body.touching.up){
+                    this.player.stop();
+                    return;
+                }
+    
+                if(frame.index == this.player.config.jumpFrame){
+                    this.ableToChange = false;
+                    
+                    this.player.setOffset(this.player.width*this.player.originX, 0);
+                    this.player.setOwnSize(this.player.getSize());
+                    
+                    this.player.setVelocityY(-600);
+    
+                    this.player.off("animationupdate");
+                    this.ableToChange = true;
+    
+                    
+                }
             }
         });
         
@@ -399,19 +402,16 @@ class PlayerSlideState extends PlayerState{
     enterState(){
         this.player.setFrictionX(1);
         this.previousSize = this.player.getSize();
-        // for(let i = 0; i < 24; i++){
-        //     if(this.player.flipX){
-        //         this.player.body.setOffset(i*4,100);
-        //     }else{
-        //         this.player.body.setOffset(i,100);
-        //     }
-        // }
 
         this.player.on(`animationupdate`, (anim, frame) =>{
             if(frame.index == this.player.config.slideFrame){
-                
-                this.player.setOffset(0, this.player.originY*1.2);
                 this.player.setOwnSize({x: 128, y: 64});
+
+                for(let i = 0; i < 24; i++){
+                    this.player.setOffset(0, this.player.height * this.player.originY * i*4);
+                }
+                this.player.setOffset(0, this.player.height * this.player.originY);
+                
                 this.player.off("animationupdate");
             }
         });

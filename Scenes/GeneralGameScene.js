@@ -32,7 +32,7 @@ class GeneralGameScene extends Phaser.Scene{
             spriteOrigin: {x: 0.2, y: 0.5},
             defaultVelocity: 200,
             velocityMultiplier: 2,
-            maxHealth: Infinity,
+            maxHealth: 100,
             jumpFrame: 3,
             slideFrame: 3,
             possibleStates: ["Idle", "Walk", "Jump","Fall", "Land", "Run", "Slide", "Attack", "Dead"],
@@ -44,6 +44,7 @@ class GeneralGameScene extends Phaser.Scene{
                 {name: "Fall", animationParams: {end: 5, framerate: 12, repeat: -1}},
                 {name: "Land", animationParams: {end: 11, framerate: 20,}},
                 {name: "Slide", animationParams: {end: 5, framerate: 15}},
+                {name: "Attack", animationParams: {end: 11, framerate: 15}},
                 {name: "Dead", animationParams: {end: 17, framerate: 20}}
             ],
             controls: controls,
