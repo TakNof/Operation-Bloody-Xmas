@@ -9,8 +9,7 @@ class Weapon extends Entity{
     * @param {Object} config The specific configuration of the weapon
     */
     constructor(scene, originInfo, config){
-        super(scene, originInfo, config.name, config.size);
-        scene.physics.add.existing(this, false);
+        super(scene, originInfo, config.name);
 
         if(this.originInfo.angleOffset){
             this.rotation = adjustAngleValue(this.originInfo.angleOffset);
@@ -18,7 +17,6 @@ class Weapon extends Entity{
 
         this.config = config;
 
-        this.originX = this.config.originPosition.x;
-        this.originY = this.config.originPosition.y;
+        this.setOrigin(this.config.originPosition.x, this.config.originPosition.y);
     }
 }

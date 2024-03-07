@@ -21,8 +21,8 @@ class PlayerIdleState extends PlayerState{
         }else if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
             this.player.getStateMachine().transitionToState('Walk');
         }
-        
-        if(this.player.body.onFloor() && !this.player.isLanding){
+
+        if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
             if(space.isDown){
                 this.player.getStateMachine().transitionToState('Jump');
             }else{
@@ -35,7 +35,7 @@ class PlayerIdleState extends PlayerState{
             this.player.getStateMachine().transitionToState('Fall');
         }
 
-        this.updateChildren();
+
     }
 
     exitState(){}
@@ -83,7 +83,7 @@ class PlayerWalkState extends PlayerState{
             this.player.stateMachine.transitionToState('Idle');
         }
 
-        if(this.player.body.onFloor() && !this.player.isLanding){
+        if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else if(shift.isDown){
@@ -109,7 +109,7 @@ class PlayerWalkState extends PlayerState{
 
         this.player.setVelocityX(sign*defaultVelocity);
 
-        this.updateChildren();
+
     }
 
     exitState(){}
@@ -166,7 +166,7 @@ class PlayerRunState extends PlayerState{
 
         this.player.setVelocityX(sign*defaultVelocity*velocityMultiplier);
 
-        if(this.player.body.onFloor() && !this.player.isLanding){
+        if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
             }else if(down.isDown ^ s.isDown && scene.time.now - this.player.lastSlideTimer >= slideCooldown){
@@ -189,7 +189,7 @@ class PlayerRunState extends PlayerState{
             this.player.stateMachine.transitionToState('Idle');
         }
 
-        this.updateChildren();
+
     }
 
     exitState(){}
@@ -259,9 +259,7 @@ class PlayerJumpState extends PlayerState{
     updateState(){
         if(this.ableToChange){
             this.player.getStateMachine().transitionToState(this.previousStateStr);
-        }
-        this.updateChildren();
-        
+        }        
     }
 
     exitState(){}
@@ -311,7 +309,7 @@ class PlayerFallState extends PlayerState{
             this.player.stop();
             this.player.getStateMachine().transitionToState("Land");
         }
-        this.updateChildren();
+
     }
 
     exitState(){}
@@ -359,7 +357,7 @@ class PlayerLandState extends PlayerState{
     }
 
     updateState(){
-        this.updateChildren();
+
     }
 
     exitState(){
@@ -407,9 +405,7 @@ class PlayerSlideState extends PlayerState{
             if(frame.index == this.player.config.slideFrame){
                 this.player.setOwnSize({x: 128, y: 64});
 
-                for(let i = 0; i < 24; i++){
-                    this.player.setOffset(0, this.player.height * this.player.originY * i*4);
-                }
+
                 this.player.setOffset(0, this.player.height * this.player.originY);
                 
                 this.player.off("animationupdate");
@@ -429,11 +425,7 @@ class PlayerSlideState extends PlayerState{
         }
 
         if(this.player.body.onFloor() && !this.player.isLanding){
-            if(space.isDown){
-                this.player.stateMachine.transitionToState('Jump');
-            }else{
-                this.player.play(this.player.getSpriteAnimations("Slide"), true);
-            }
+            this.player.play(this.player.getSpriteAnimations("Slide"), true);
         }
 
         if(scene.time.now - this.player.lastSlideTimer >= slideDuration){
@@ -443,10 +435,12 @@ class PlayerSlideState extends PlayerState{
                 this.player.stateMachine.transitionToState('Walk');
             }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
                 this.player.stateMachine.transitionToState('Idle');
+            }else if(space.isDown && this.player.body.onFloor()){
+                this.player.stateMachine.transitionToState('Jump');
             }
         }
 
-        this.updateChildren();
+
     }
 
     exitState(){
@@ -487,32 +481,78 @@ class PlayerAttackState extends PlayerState{
         super(player, key);
     }
 
-    enterState(){
-        this.isOnProgress = true;
-        
-        let sign = this.player.flipX ? -1 : 1;
-        this.player.getScene().tweens.add({
-            targets: this.player.getCurrentWeapon(),
-            angle: sign*180,
-            duration: 100,
-            ease: "Linear",
-            yoyo: true,
-            onStart: () => {
-                this.checkHittingEnemies();
-            },
-            onComplete: () => {
-                this.isOnProgress = false;
-            },
+    enterState(){        
+        this.ableToChange = false;
+        this.player.play(this.player.getSpriteAnimations("Attack"));
+
+        // this.player.setOwnSize(this.player.getSize());
+        this.player.setOffset(this.player.width*this.player.originX*0.8, this.player.height*0.25);
+
+        this.player.on(`animationupdate`, (anim, frame) =>{
+            if(frame.index == this.player.getCurrentWeapon().config.hitFrame && anim.key === this.player.getSpriteAnimations("Attack")){
+                    
+                // this.checkHittingEnemies();
+
+
+                this.player.off("animationupdate");
+                this.ableToChange = true;
+                this.player.isAttacking = true;
+            }
+        });
+
+        this.player.on(`animationcomplete-${this.player.getSpriteAnimations("Attack")}`, ()=>{
+            this.player.isAttacking = false;
+            this.player.off(`animationcomplete-${this.player.getSpriteAnimations("Attack")}`);
+        });
+
+        this.player.on("animationstop", (anim, frame)=>{
+            if(anim.key === this.player.getSpriteAnimations("Attack")){
+                this.player.isAttacking = false;
+                this.player.off("animationstop");
+            }
         });
     }
 
-    updateState(){
-        this.updateChildren(true, false, true);
-        
-        if(!this.isOnProgress && this.player.isAlive){
+    updateState(){        
+        if(this.ableToChange && this.player.isAlive){
             this.player.getStateMachine().transitionToState("Idle");
         }
     }
+
+    // enterState(){
+    //     this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
+    //     this.player.play(this.player.getSpriteAnimations("Jump"), true);
+    //     this.player.on(`animationupdate`, (anim, frame) =>{
+
+    //         if(anim.key === this.player.getSpriteAnimations("Jump")){
+    //             if(this.player.body.touching.up){
+    //                 this.player.stop();
+    //                 return;
+    //             }
+    
+    //             if(frame.index == this.player.config.jumpFrame){
+    //                 this.ableToChange = false;
+                    
+    //                 this.player.setOffset(this.player.width*this.player.originX, 0);
+    //                 this.player.setOwnSize(this.player.getSize());
+                    
+    //                 this.player.setVelocityY(-600);
+    
+    //                 this.player.off("animationupdate");
+    //                 this.ableToChange = true;
+    
+                    
+    //             }
+    //         }
+    //     });
+        
+    // }
+
+    // updateState(){
+    //     if(this.ableToChange){
+    //         this.player.getStateMachine().transitionToState(this.previousStateStr);
+    //     }        
+    // }
 
     checkHittingEnemies(){
         const {scene, config} = this.player;

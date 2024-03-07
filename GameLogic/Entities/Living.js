@@ -14,14 +14,111 @@ class Living extends Entity{
     * 
     */
     constructor(scene, originInfo, spriteImgStr, size, defaultVelocity){
-        super(scene, originInfo, spriteImgStr, size);
+        super(scene, originInfo, spriteImgStr);
         this.defaultVelocity = defaultVelocity;
+
+        scene.physics.add.existing(this, false);
+        this.setOwnSize(size);
+        this.setCollideWorldBounds(true);
         
         this.children = [];
         this.damagedTimeHistory = [];
 
         this.isAlive = true;
         this.isStunned = false;
+    }
+
+    /**
+    * Sets the size of the sprite.
+    * @param {Number} size 
+    */
+    setOwnSize(size){
+        this.size = size;
+        if(!size.x){
+            this.setSize(size, size, true);
+        }else{
+            this.setSize(size.x, size.y, true);
+        }
+    }   
+
+    /**
+     * Gets the size of the sprite.
+     * @return {Number}
+     */
+    getSize(){
+        return this.size;
+    }
+
+    /**
+     * Sets the velocity in the X component of the living sprite.
+     * @param {number} value
+     */
+    setVelocityX(value){
+        this.body.setVelocityX(value);
+    }
+
+    /**
+     * Gets the velocity in the X component of the living sprite.
+     * @returns {number}
+     */
+    getVelocityX(){
+        return this.body.velocity.x;
+    }
+
+    /**
+     * Sets the velocity in the Y component of the living sprite.
+     * @param {number} value
+     */
+    setVelocityY(value){
+        this.body.setVelocityY(value);
+    }
+
+    /**
+     * Gets the velocity in the Y component of the living sprite.
+     * @returns {number}
+     */
+    getVelocityY(){
+        return this.body.velocity.y;
+    }
+
+    /**
+     * Sets the velocity in both axis of the living sprite.
+     * @param {Number} value
+     */
+    setVelocity(value){
+        this.setVelocityX(value);
+        this.setVelocityY(value);
+    }
+
+    /**
+     * Gets the velocity in both components of the living sprite.
+     * @returns {{Number, Number}}
+     */
+    getVelocity(){
+        return {x : this.getVelocityX(), y : this.getVelocityY()}
+    }
+
+    /**
+     * Gets the default velocity of the living sprite.
+     * @returns {Number}
+     */
+    getDefaultVelocity(){
+        return this.defaultVelocity;
+    }
+
+    /**
+     * Sets the elements to collide with.
+     */
+    setColliderElements(){
+        this.colliderElements = this;
+    }
+
+    /**
+     * Gets the elements to collide with.
+     * @returns {Array}
+     */
+    getColliderElements(){
+        return this.colliderElements;
     }
 
     /**

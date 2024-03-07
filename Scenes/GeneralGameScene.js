@@ -17,9 +17,9 @@ class GeneralGameScene extends Phaser.Scene{
             name: "PineSword",
             type: "Melee",
             position: {x: 30, y: 10, angleOffset: Math.PI/4},
-            size: {x: 54, y: 54},
-            originPosition: {x: 0.5, y: 1},
+            originPosition: {x: 0.5, y: 0.5},
             damage: 40,
+            hitFrame: 6,
             soundDir: "",
             spriteDir: "./assets/Player/Weapons/Pine Sword/Sprite/Pine Sword.png"
         }
@@ -29,7 +29,7 @@ class GeneralGameScene extends Phaser.Scene{
         this.playerConfig = {
             name: "player",
             size: {x: 50, y: 128},
-            spriteOrigin: {x: 0.2, y: 0.5},
+            originPosition: {x: 0.2, y: 0.5},
             defaultVelocity: 200,
             velocityMultiplier: 2,
             maxHealth: 100,
@@ -44,7 +44,7 @@ class GeneralGameScene extends Phaser.Scene{
                 {name: "Fall", animationParams: {end: 5, framerate: 12, repeat: -1}},
                 {name: "Land", animationParams: {end: 11, framerate: 20,}},
                 {name: "Slide", animationParams: {end: 5, framerate: 15}},
-                {name: "Attack", animationParams: {end: 11, framerate: 15}},
+                {name: "Attack", animationParams: {end: 11, framerate: 30}},
                 {name: "Dead", animationParams: {end: 17, framerate: 20}}
             ],
             controls: controls,

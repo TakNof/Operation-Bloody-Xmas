@@ -22,13 +22,13 @@ class Game extends GeneralGameScene{
 
         // this.skeleton = new Skeleton(this, {x: canvasSize.height*4*0.015, y: canvasSize.height*4*0.8}, this.skeletonConfig);
 
-        this.skeletons = new EnemyGroup(this, 5, this.walls, this.skeletonConfig);
+        // this.skeletons = new EnemyGroup(this, 1, this.walls, this.skeletonConfig);
 
         this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         // this.player.getRaycaster().mapGameObjects(this.skeleton, true );
         
-        this.walls.setColliders(this.player, this.skeletons);
-        // this.walls.setColliders(this.player)
+        // this.walls.setColliders(this.player, this.skeletons);
+        this.walls.setColliders(this.player)
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
         // this.cameras.main.setZoom(0.5, 1);
@@ -44,7 +44,7 @@ class Game extends GeneralGameScene{
 
     update(time, delta){
         this.player.update();
-        this.skeletons.callAll("update");
+        // this.skeletons.callAll("update");
         // console.log(this.sword.angle);
         // console.log(this.player.isLanding);
         // this.skeleton.update();

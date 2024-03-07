@@ -14,21 +14,18 @@ class Player extends Living{
     constructor(scene, originInfo, config){
         super(scene, originInfo, config.name, config.size, config.defaultVelocity);
         this.config = config;
-        this.setOrigin(this.config.spriteOrigin.x, this.config.spriteOrigin.y);
+        this.setOrigin(this.config.originPosition.x, this.config.originPosition.y);
         this.setBounce(0.1);
 
         this.setMaxHealth(config.maxHealth);
         this.setStateMachine(...config.possibleStates);
         this.setSpriteAnimations(config.animations);
         this.setWeapons(config.weapons);
-        // console.log(this.width - this.body.width, this.height - this.body.height);
-        // this.setOffset(this.width - this.body.width, this.height - this.body.height);
-        // this.setOffset(this.body.width/2, 0);
-        // this.setOffset();
 
         this.pressedKeyHistory = [];
         this.lastSlideTimer = -config.slideCooldown;
         this.isLanding = false;
+        this.isAttacking = false;
         
         this.getScene().input.keyboard.on('keydown', (event) => {
             if(this.config.controls[event.key.toLowerCase()])
@@ -53,7 +50,6 @@ class Player extends Living{
             let weaponClass = this.__checkClassConstructor(`${weapon.type}Weapon`, "Weapon");
             this.weapons[i] = new weaponClass(this.getScene(), weapon.position, weapon);
             this.weapons[i].setVisible(false);
-            this.addChild(this.weapons[i]);
         }
 
         this.setCurrentWeapon(this.weapons[0]);        
