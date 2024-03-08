@@ -14,7 +14,7 @@ class Player extends Living{
     constructor(scene, originInfo, config){
         super(scene, originInfo, config.name, config.size, config.defaultVelocity);
         this.config = config;
-        this.setOrigin(this.config.originPosition.x, this.config.originPosition.y);
+        this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y)
         this.setBounce(0.1);
 
         this.setMaxHealth(config.maxHealth);
@@ -23,21 +23,30 @@ class Player extends Living{
         this.setWeapons(config.weapons);
 
         this.pressedKeyHistory = [];
-        this.lastSlideTimer = -config.slideCooldown;
+        this.lastSlideTimer = -config.slideConfig.slideCooldown;
         this.isLanding = false;
         this.isAttacking = false;
-        
+
+        this.bodyMarker = this.scene.add.circle(this.x, this.y, 5, 0xb31714); //Red
+        this.offsetMarker = this.scene.add.circle(this.x, this.y, 5, 0xd4c711); //yellow
+        this.originMarker = this.scene.add.circle(this.x, this.y, 5, 0x11d445); //green
+
+        this.playerText = this.scene.add.text(0, 0, `${this.health}`, {
+            fontSize: '48px',
+            fill: '#000000'
+        });
+
         this.getScene().input.keyboard.on('keydown', (event) => {
             if(this.config.controls[event.key.toLowerCase()])
                 this.addkeyToHistory(event.key.toLowerCase());
         });
 
         this.getScene().input.on('pointerdown', function (pointer){
-            if(pointer.leftButtonDown() && this.player.getStateMachine().currentState.stateKey != "Attack" && this.player.isAlive){
+            if(pointer.leftButtonDown() && this.player.getStateMachine().currentState.stateKey != "Attack" && !this.player.isAttacking && this.player.isAlive){
                 this.player.getStateMachine().transitionToState("Attack");
             }
         }, this.getScene());
-    }
+            }
 
     /**
      * Sets the list of weapons of the player.
@@ -252,5 +261,17 @@ class Player extends Living{
             ray.setOrigin(this.getPositionX(), this.getPositionY());
             ray.cast()
         }
+        this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
+
+        let offsetX = this.body.center.x - this.body.width/2;
+        let offsetY = this.body.center.y - this.body.height/2;
+
+        this.offsetMarker.setPosition(offsetX, offsetY);
+        
+        this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
+
+        this.playerText.x = this.x - 50;
+        this.playerText.y = this.y - 100;
+        this.playerText.text = `${this.health}`;
     }
 }

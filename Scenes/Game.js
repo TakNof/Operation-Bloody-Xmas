@@ -11,18 +11,15 @@ class Game extends GeneralGameScene{
         this.walls = new WallsBuilder(this, "wall", 32, 40, true, true );
         this.walls.createWalls();
 
-        this.player = new Player(this, {x: canvasSize.width/2, y: 0}, this.playerConfig);
+        // this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.46}, this.playerConfig);
+        this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.1}, this.playerConfig);
         this.player.setRaycaster(1);
-        this.player.getStateMachine().printTransitions = true;
-        
-        this.playerText = this.add.text(100, 420, `${this.player.health}`, {
-            fontSize: '48px',
-            fill: '#000000'
-        });
-
+        // this.player.getStateMachine().printTransitions = true;
+        // this.player.body.syncBounds = true;
+    
         // this.skeleton = new Skeleton(this, {x: canvasSize.height*4*0.015, y: canvasSize.height*4*0.8}, this.skeletonConfig);
 
-        // this.skeletons = new EnemyGroup(this, 1, this.walls, this.skeletonConfig);
+        // this.skeletons = new EnemyGroup(this, 20, this.walls, this.skeletonConfig);
 
         this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         // this.player.getRaycaster().mapGameObjects(this.skeleton, true );
@@ -48,9 +45,5 @@ class Game extends GeneralGameScene{
         // console.log(this.sword.angle);
         // console.log(this.player.isLanding);
         // this.skeleton.update();
-
-        this.playerText.x = this.player.x - 50;
-        this.playerText.y = this.player.y - 100;
-        this.playerText.text = `${this.player.health}`;
     }
 }

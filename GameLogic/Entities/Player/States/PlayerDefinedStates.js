@@ -8,12 +8,14 @@ class PlayerIdleState extends PlayerState{
         super(player, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.player.startAnimationWithOffset(); 
+    }
         
     updateState(){
-
+        // console.log(this.player.body.center);
         const {a, d, left, right, shift, space} = this.player.config.controls;
-
+    
         this.player.setVelocityX(0);
 
         if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && shift.isDown) {
@@ -27,15 +29,12 @@ class PlayerIdleState extends PlayerState{
                 this.player.getStateMachine().transitionToState('Jump');
             }else{
                 this.player.play(this.player.getSpriteAnimations("Idle"), true);
-                this.player.setOwnSize(this.player.getSize());
             }
         }
 
         if(this.player.getVelocityY() > 800){
             this.player.getStateMachine().transitionToState('Fall');
         }
-
-
     }
 
     exitState(){}
@@ -73,7 +72,9 @@ class PlayerWalkState extends PlayerState{
         super(player, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.player.startAnimationWithOffset();
+    }
 
     updateState(){
         const {a, d, left, right, shift, space} = this.player.config.controls;
@@ -99,10 +100,9 @@ class PlayerWalkState extends PlayerState{
         
         if(left.isDown ^ a.isDown  && !this.player.flipX){
             this.player.flipX= true;
-            this.player.setOwnSize(this.player.getSize());
+            // this.player.setOwnSize(this.player.config.size);
         }else if(right.isDown ^ d.isDown && this.player.flipX){
             this.player.flipX= false;
-            this.player.setOwnSize(this.player.getSize());
         }
 
         let sign = this.player.flipX ? -1: 1;
@@ -147,19 +147,19 @@ class PlayerRunState extends PlayerState{
         super(player, key);
     }
 
-    enterState(){}
+    enterState(){
+        this.player.startAnimationWithOffset();
+    }
 
     updateState(){
         const {scene} = this.player;
         const {a, s, d, left, down, right, shift, space} = this.player.config.controls;
-        const {defaultVelocity, velocityMultiplier, slideCooldown, slideDashAdder} = this.player.config;
+        const {defaultVelocity, velocityMultiplier, slideConfig} = this.player.config;
 
         if(left.isDown ^ a.isDown  && !this.player.flipX){
             this.player.flipX= true;
-            this.player.setOwnSize(this.player.getSize());
         }else if(right.isDown ^ d.isDown && this.player.flipX){
             this.player.flipX= false;
-            this.player.setOwnSize(this.player.getSize());
         }
 
         let sign = this.player.flipX ? -1: 1;
@@ -169,10 +169,7 @@ class PlayerRunState extends PlayerState{
         if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
-            }else if(down.isDown ^ s.isDown && scene.time.now - this.player.lastSlideTimer >= slideCooldown){
-                this.player.lastSlideTimer = scene.time.now;
-                
-                this.player.setVelocityX(sign*(defaultVelocity*velocityMultiplier + slideDashAdder));
+            }else if(down.isDown ^ s.isDown && scene.time.now - this.player.lastSlideTimer >= slideConfig.slideCooldown){
                 this.player.stateMachine.transitionToState("Slide");
             }else{
                 this.player.play(this.player.getSpriteAnimations("Run"), true);
@@ -228,23 +225,24 @@ class PlayerJumpState extends PlayerState{
     }
 
     enterState(){
+        const {jumpConfig} = this.player.config;
+
         this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
+        this.player.startAnimationWithOffset();
         this.player.play(this.player.getSpriteAnimations("Jump"), true);
+
         this.player.on(`animationupdate`, (anim, frame) =>{
 
             if(anim.key === this.player.getSpriteAnimations("Jump")){
-                if(this.player.body.touching.up){
+                if(this.player.body.onCeiling()){
                     this.player.stop();
                     return;
                 }
     
-                if(frame.index == this.player.config.jumpFrame){
+                if(frame.index == jumpConfig.jumpFrame){
                     this.ableToChange = false;
                     
-                    this.player.setOffset(this.player.width*this.player.originX, 0);
-                    this.player.setOwnSize(this.player.getSize());
-                    
-                    this.player.setVelocityY(-600);
+                    this.player.setVelocityY(jumpConfig.jumpVelocity);
     
                     this.player.off("animationupdate");
                     this.ableToChange = true;
@@ -298,10 +296,8 @@ class PlayerFallState extends PlayerState{
     }
 
     enterState(){
+        this.player.startAnimationWithOffset();
         this.player.play(this.player.getSpriteAnimations("Fall"), true);
-
-        this.player.setOffset(this.player.width*this.player.originX, 0);
-        this.player.setOwnSize(this.player.getSize());
     }
 
     updateState(){
@@ -349,9 +345,8 @@ class PlayerLandState extends PlayerState{
 
     enterState(){
         this.player.isLanding = true;
+        this.player.startAnimationWithOffset();
         this.player.play(this.player.getSpriteAnimations("Land"));
-        this.player.setOffset(this.player.width*this.player.originX, 0);
-        this.player.setOwnSize(this.player.getSize());
 
         this.player.getStateMachine().transitionToState("Idle");
     }
@@ -398,16 +393,24 @@ class PlayerSlideState extends PlayerState{
     }
 
     enterState(){
+        const {scene} = this.player;
+        const {defaultVelocity, velocityMultiplier} = this.player.config;
+        const {slideConfig} = this.player.config;
+
+        this.player.lastSlideTimer = scene.time.now;
+        let sign = this.player.flipX ? -1: 1;
+        
         this.player.setFrictionX(1);
-        this.previousSize = this.player.getSize();
+        this.player.setOwnSize({x: 128, y: 64});
+
+        this.player.startAnimationWithOffset(0.5, 0.8, 128, 64);
+        this.player.play(this.player.getSpriteAnimations("Slide"), true);
 
         this.player.on(`animationupdate`, (anim, frame) =>{
-            if(frame.index == this.player.config.slideFrame){
-                this.player.setOwnSize({x: 128, y: 64});
-
-
-                this.player.setOffset(0, this.player.height * this.player.originY);
+            if(frame.index == slideConfig.slideFrame){
                 
+                this.player.setVelocityX(sign*(defaultVelocity* velocityMultiplier + slideConfig.slideDashAdder));
+        
                 this.player.off("animationupdate");
             }
         });
@@ -416,7 +419,8 @@ class PlayerSlideState extends PlayerState{
     updateState(){
         const {a, d, left, right, shift, space} = this.player.config.controls;
         const {scene} = this.player;
-        const {defaultVelocity, velocityMultiplier, slideDuration} = this.player.config;
+        const {defaultVelocity, velocityMultiplier} = this.player.config;
+        const {slideConfig} = this.player.config;
 
         let sign = this.player.flipX ? -1: 1;
 
@@ -424,11 +428,8 @@ class PlayerSlideState extends PlayerState{
             this.player.setVelocityX(this.player.getVelocityX() - sign*10);
         }
 
-        if(this.player.body.onFloor() && !this.player.isLanding){
-            this.player.play(this.player.getSpriteAnimations("Slide"), true);
-        }
-
-        if(scene.time.now - this.player.lastSlideTimer >= slideDuration){
+        if(scene.time.now - this.player.lastSlideTimer >= slideConfig.slideDuration || this.player.body.onWall()){
+            this.player.play(this.player.getSpriteAnimations("Idle"), true);
             if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && shift.isDown){
                 this.player.stateMachine.transitionToState('Run');
             }else if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
@@ -445,7 +446,9 @@ class PlayerSlideState extends PlayerState{
 
     exitState(){
         this.player.setFrictionX(0);
-        this.player.setOwnSize(this.previousSize);
+        this.player.y -= this.player.body.height/2;
+        this.player.setOwnSize(this.player.config.size);
+        this.player.body.reset(this.player.x, this.player.y);
     }
 
     getNextState(){
@@ -483,20 +486,23 @@ class PlayerAttackState extends PlayerState{
 
     enterState(){        
         this.ableToChange = false;
+        this.player.startAnimationWithOffset(0.5, 0.6, this.player.config.size.x, this.player.config.size.y);
         this.player.play(this.player.getSpriteAnimations("Attack"));
+        this.player.isAttacking = true;
 
-        // this.player.setOwnSize(this.player.getSize());
-        this.player.setOffset(this.player.width*this.player.originX*0.8, this.player.height*0.25);
+        // if(this.player.body.onFloor()){
+        //     this.player.y -=32;
+        // }
 
         this.player.on(`animationupdate`, (anim, frame) =>{
+            // console.log(this.player.originX, this.player.originY)
+            // console.log(this.player);
             if(frame.index == this.player.getCurrentWeapon().config.hitFrame && anim.key === this.player.getSpriteAnimations("Attack")){
                     
                 // this.checkHittingEnemies();
-
-
+                
                 this.player.off("animationupdate");
                 this.ableToChange = true;
-                this.player.isAttacking = true;
             }
         });
 
@@ -518,41 +524,6 @@ class PlayerAttackState extends PlayerState{
             this.player.getStateMachine().transitionToState("Idle");
         }
     }
-
-    // enterState(){
-    //     this.previousStateStr = this.player.getStateMachine().getStateHistory()[this.player.getStateMachine().getStateHistory().length - 2];
-    //     this.player.play(this.player.getSpriteAnimations("Jump"), true);
-    //     this.player.on(`animationupdate`, (anim, frame) =>{
-
-    //         if(anim.key === this.player.getSpriteAnimations("Jump")){
-    //             if(this.player.body.touching.up){
-    //                 this.player.stop();
-    //                 return;
-    //             }
-    
-    //             if(frame.index == this.player.config.jumpFrame){
-    //                 this.ableToChange = false;
-                    
-    //                 this.player.setOffset(this.player.width*this.player.originX, 0);
-    //                 this.player.setOwnSize(this.player.getSize());
-                    
-    //                 this.player.setVelocityY(-600);
-    
-    //                 this.player.off("animationupdate");
-    //                 this.ableToChange = true;
-    
-                    
-    //             }
-    //         }
-    //     });
-        
-    // }
-
-    // updateState(){
-    //     if(this.ableToChange){
-    //         this.player.getStateMachine().transitionToState(this.previousStateStr);
-    //     }        
-    // }
 
     checkHittingEnemies(){
         const {scene, config} = this.player;

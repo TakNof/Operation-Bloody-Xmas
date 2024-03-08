@@ -42,7 +42,7 @@ class StateMachine{
 
         this.addStateToHistory();
         this.currentState.enterState();
-
+        
         this.isTransitioningState = false;
     }
     

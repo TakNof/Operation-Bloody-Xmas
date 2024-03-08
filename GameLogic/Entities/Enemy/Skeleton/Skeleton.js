@@ -21,6 +21,7 @@ class Skeleton extends Enemy{
         this.swordHitBox = this.getScene().add.rectangle(x, y, width, height, 0xffffff, 0);
         this.getScene().physics.add.existing(this.swordHitBox, false);
         this.swordHitBox.body.setAllowGravity(false);
+        this.swordHitBox.body.setImmovable(true);
         this.swordHitBox.body.enable = false;
         
         this.addChild(this.swordHitBox);

@@ -29,12 +29,20 @@ class GeneralGameScene extends Phaser.Scene{
         this.playerConfig = {
             name: "player",
             size: {x: 50, y: 128},
-            originPosition: {x: 0.2, y: 0.5},
+            originPosition: {x: 0.5, y: 0.5},
             defaultVelocity: 200,
             velocityMultiplier: 2,
             maxHealth: 100,
-            jumpFrame: 3,
-            slideFrame: 3,
+            jumpConfig: {
+                jumpFrame: 3,
+                jumpVelocity: -600,
+            },
+            slideConfig: {
+                slideFrame: 3,
+                slideCooldown: 2000,
+                slideDuration: 500,
+                slideDashAdder: 400,
+            },
             possibleStates: ["Idle", "Walk", "Jump","Fall", "Land", "Run", "Slide", "Attack", "Dead"],
             animations: [
                 {name: "Idle", animationParams: {end: 5, framerate: 15}},
@@ -43,14 +51,11 @@ class GeneralGameScene extends Phaser.Scene{
                 {name: "Jump", animationParams: {end: 11, framerate: 15}},
                 {name: "Fall", animationParams: {end: 5, framerate: 12, repeat: -1}},
                 {name: "Land", animationParams: {end: 11, framerate: 20,}},
-                {name: "Slide", animationParams: {end: 5, framerate: 15}},
+                {name: "Slide", animationParams: {end: 5, framerate: 30}},
                 {name: "Attack", animationParams: {end: 11, framerate: 30}},
                 {name: "Dead", animationParams: {end: 17, framerate: 20}}
             ],
             controls: controls,
-            slideCooldown: 2000,
-            slideDuration: 500,
-            slideDashAdder: 400,
             weapons: weapons
         }
 

@@ -23,7 +23,8 @@ class Living extends Entity{
         
         this.children = [];
         this.damagedTimeHistory = [];
-
+        this.lastPlayedAnimation = "";
+        
         this.isAlive = true;
         this.isStunned = false;
     }
@@ -47,6 +48,23 @@ class Living extends Entity{
      */
     getSize(){
         return this.size;
+    }
+
+    /**
+     * Custom origin object for the sprite and the correct positioning of the body according to this set origin.
+     * @param {Number} x 
+     * @param {Number} y 
+     */
+    setCustomSpriteOrigin(x = 0.5, y = 0.5){
+        this.customSpriteOrigin = {x: this.flipX ? 1 - x: x, y: y};
+    }
+
+    /**
+     * Returns the custom Sprite origin object.
+     * @returns 
+     */
+    getCustomSpriteOrigin(){
+        return this.customSpriteOrigin;
     }
 
     /**
@@ -382,6 +400,41 @@ class Living extends Entity{
         }
         return this.getScene().add.text(this.getPositionX(), this.getPositionY(), `${text.charAt(0).toUpperCase() + text.slice(1)}!`, config).setOrigin(0.5, 0.5);
     }
+
+    
+    /**
+     * 
+     * @param {Number} otherWidth 
+     * @param {Number} otherHeight 
+     */
+        setOffsetByOrigin(otherWidth, otherHeight = otherWidth){
+            let x;
+            let y;
+    
+            if(otherWidth){
+                x = otherWidth*this.getCustomSpriteOrigin().x - this.body.width/2;
+                y =  otherHeight*this.getCustomSpriteOrigin().y - this.body.height/2;
+            }else{
+                x  = this.width*this.getCustomSpriteOrigin().x - this.body.width/2;
+                y =  this.height*this.getCustomSpriteOrigin().y - this.body.height/2;
+            }
+    
+            if(this.body.offset.x != x || this.body.offset.y != y){
+                this.setOffset(x, y);
+            }
+        }
+    
+        startAnimationWithOffset(originX, originY, otherWidth, otherHeight = otherWidth) {
+            this.setCustomSpriteOrigin(originX, originY);        
+    
+            this.on("animationstart", (anims, frame) =>{
+                if(this.lastPlayedAnimation !== anims.key && anims.key === this.anims.currentAnim.key){
+                    this.setOffsetByOrigin(otherWidth, otherHeight);
+                    this.lastPlayedAnimation = anims.key;
+                    // console.log("Calling setOffsetByOrigin method");
+                }
+            });
+        }
 
     /**
      * 

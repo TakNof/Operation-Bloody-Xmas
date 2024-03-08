@@ -151,7 +151,7 @@ class SkeletonChaseState extends EnemyState{
                 this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
             }
 
-            this.enemy.flipX = player.getPositionX() < this.enemy.getPositionX();
+            this.enemy.flipX = player.getPositionX() - this.enemy.getPositionX() <= 0.1;
             let sign = this.enemy.flipX ? -1: 1;
 
             this.enemy.setVelocityX(sign*this.enemy.defaultVelocity);
