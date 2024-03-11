@@ -13,15 +13,7 @@ class Enemy extends Living{
     */
 
     constructor(scene, originInfo, config){
-        super(scene, originInfo, config.name, config.size, config.defaultVelocity);
-        this.config = config;
-
-        this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
-        this.setMaxHealth(config.maxHealth);
-        this.setSpriteAnimations(config.animations);
-        this.setSpriteSounds(config.name, config.sounds);
-        this.setStateMachine(...config.possibleStates);
-        
+        super(scene, originInfo, config);        
 
         this.playerInSight = false;
         this.stunned = false;

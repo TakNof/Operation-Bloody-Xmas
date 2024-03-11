@@ -16,10 +16,9 @@ class SkeletonIdleState extends EnemyState{
             }
         }
         
-        this.timeout = setTimeout(() =>{
+        this.timeout = this.enemy.getScene().time.delayedCall(getRndInteger(2, 3)*1000, () =>{
             this.enemy.getStateMachine().transitionToState("Patrol");
-        
-        }, getRndInteger(2, 3)*1000)
+        });
     }
 
     updateState(){
@@ -27,8 +26,9 @@ class SkeletonIdleState extends EnemyState{
         this.enemy.play(this.enemy.getSpriteAnimations("Idle"), true);
         
         if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && this.enemy.getScene().player.isAlive){
-            clearTimeout(this.timeout);
+            this.timeout.destroy();
             this.enemy.getStateMachine().transitionToState("Chase");
+            this.enemy.displayIndicativeTextTween("!!!", 3000);
         }
     }
 
@@ -68,18 +68,32 @@ class SkeletonPatrolState extends EnemyState{
     }
 
     enterState(){
-        this.soundConfig = `Walk_${getRndInteger(1, 4)}`;
-        this.enemy.setVelocityX(-this.enemy.defaultVelocity);
-        this.enemy.flipX = true;
+        const {defaultVelocity} = this.enemy.config;
 
-        this.firstTimeout = setTimeout(() =>{
-            this.enemy.setVelocityX(this.enemy.defaultVelocity);
-            this.enemy.flipX = false;
-            
-            this.secondTimeout = setTimeout(() =>{
-                this.enemy.stateMachine.transitionToState("Idle");                    
-            }, getRndInteger(2, 3)*1000)
-        }, getRndInteger(2, 3)*1000)
+        this.soundConfig = `Walk_${getRndInteger(1, 4)}`;
+        this.enemy.flipX = !this.enemy.flipX;
+        let sign = this.enemy.flipX ? -1: 1;
+        this.enemy.setVelocityX(sign*defaultVelocity);
+
+        this.interval = this.enemy.getScene().time.addEvent({
+            delay: getRndInteger(1, 3)*1000,
+            callback: ()=>{
+                this.enemy.flipX = !this.enemy.flipX;
+                let sign = this.enemy.flipX ? -1: 1;
+                this.enemy.setVelocityX(sign*defaultVelocity);
+            },
+            callbackScope: this,
+            loop: true
+        });
+
+        this.timeout = this.enemy.getScene().time.delayedCall(getRndInteger(4, 6)*1000, ()=>{
+            this.interval.remove();
+            this.timeout.destroy();
+
+            this.interval = undefined;
+            this.timeout = undefined;
+            this.enemy.stateMachine.transitionToState("Idle"); 
+        })
     }
 
     updateState(){
@@ -91,9 +105,13 @@ class SkeletonPatrolState extends EnemyState{
         }
 
         if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && player.isAlive){
-            clearTimeout(this.firstTimeout);
-            clearTimeout(this.secondTimeout);
+            this.interval.remove();
+            this.timeout.destroy();
+
+            this.interval = undefined;
+            this.timeout = undefined;
             this.enemy.getStateMachine().transitionToState("Chase");
+            this.enemy.displayIndicativeTextTween("!!!", 3000);
         }
     }
 
@@ -138,6 +156,7 @@ class SkeletonChaseState extends EnemyState{
 
     updateState(){
         const {player} = this.enemy.getScene();
+        const {defaultVelocity} = this.enemy.config;
 
         this.enemy.onWallFound();
         if(this.enemy.getDistanceToPlayer() <= this.enemy.config.attackDistance && player.isAlive){
@@ -154,7 +173,7 @@ class SkeletonChaseState extends EnemyState{
             this.enemy.flipX = player.getPositionX() - this.enemy.getPositionX() <= 0.1;
             let sign = this.enemy.flipX ? -1: 1;
 
-            this.enemy.setVelocityX(sign*this.enemy.defaultVelocity);
+            this.enemy.setVelocityX(sign*defaultVelocity);
         }
     }
 
@@ -196,36 +215,58 @@ class SkeletonSearchState extends EnemyState{
     enterState(){
         this.soundConfig1 = `Idle_${getRndInteger(1, 3)}`;
         this.soundConfig2 = `Walk_${getRndInteger(1, 4)}`;
+        this.reachedPlayerLastSeenPosition = false;
     }
 
     updateState(){
         this.enemy.onWallFound();
-        this.reachedPlayerLastSeenPosition = false;
 
+        const {defaultVelocity} = this.enemy.config;
+        
         if(Math.abs(this.enemy.lastPlayerSeenPosition.x - this.enemy.getPositionX()) <= 10 && this.enemy.getDistanceToPlayer() > this.enemy.config.chaseDistance){
             this.reachedPlayerLastSeenPosition = true;
-
+            
             this.enemy.setVelocityX(0);
             this.enemy.play(this.enemy.getSpriteAnimations("Idle"), true);
-            if(!this.enemy.getSpriteSounds(this.soundConfig1).sound.isPlaying && getRndInteger(1, 10) == 1){
-                this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
-            }
             
-            if(!this.interval){
-                this.interval = setInterval(() =>{
-                    this.enemy.flipX = !this.enemy.flipX;
-                }, 2000);
+            if(!this.interval || this.interval.paused){
+                let searchStateTime = getRndInteger(4, 6)*1000;
 
-                this.timeout = setTimeout(() =>{
-                    clearInterval(this.interval);
+                this.enemy.displayIndicativeTextTween("???", searchStateTime);
+
+                this.interval = this.enemy.getScene().time.addEvent({
+                    delay: getRndInteger(1, 3)*1000,
+                    callback: ()=>{
+                        this.enemy.flipX = !this.enemy.flipX;
+                        this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
+                    },
+                    callbackScope: this,
+                    loop: true
+                });
+
+                this.timeout = this.enemy.getScene().time.delayedCall(searchStateTime, () =>{
+                    this.interval.remove();
+                    this.timeout.destroy();
+
+                    this.interval = undefined;
+                    this.timeout = undefined;
+
                     this.enemy.getStateMachine().transitionToState("Patrol");
-                }, getRndInteger(4, 6)*1000)
+                    this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackDelay;
+                })
             }
+
         }else if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
-            clearInterval(this.interval);
-            clearTimeout(this.timeout);
-            this.enemy.getStateMachine().transitionToState("Chase");
+            if(this.interval){
+                this.interval.remove();
+                this.timeout.destroy();
+
+                this.interval = undefined;
+                this.timeout = undefined;
+            }
             
+            this.enemy.getStateMachine().transitionToState("Chase");
+            this.enemy.displayIndicativeTextTween("!!!", 3000);            
 
         }else if(!this.reachedPlayerLastSeenPosition){
             this.enemy.play(this.enemy.getSpriteAnimations("Walk"), true);
@@ -235,7 +276,7 @@ class SkeletonSearchState extends EnemyState{
             this.enemy.flipX = this.enemy.lastPlayerSeenPosition.x < this.enemy.getPositionX();
             let sign = this.enemy.flipX ? -1: 1;
 
-            this.enemy.setVelocityX(sign*this.enemy.defaultVelocity);
+            this.enemy.setVelocityX(sign*defaultVelocity);
         }
     }
 
@@ -295,8 +336,7 @@ class SkeletonAttackState extends EnemyState{
         if(player.isAlive){
             let rangeAttack = this.enemy.getDistanceToPlayer() - this.enemy.config.attackDistance;
             if(rangeAttack > 20){
-                this.enemy.getStateMachine().transitionToState("Chase");
-                this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackRate;
+                this.enemy.getStateMachine().transitionToState("Chase"); 
             }else if(scene.time.now  - this.enemy.lastAttackTimer >= config.attackRate) {
                 swordHitBox.body.enable = true;
                 this.soundConfig2 = `Attack_${getRndInteger(1, 5)}`;

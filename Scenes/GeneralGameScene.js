@@ -71,7 +71,7 @@ class GeneralGameScene extends Phaser.Scene{
             ],
             controls: controls,
             weapons: weapons,
-            sounds: this.loadAudios("player", "./assets/Player/Sounds/  ", playerSounds),
+            sounds: this.loadAudios("player", "./assets/Player/Sounds/", playerSounds),
         }
 
         for(let animation of this.playerConfig.animations){

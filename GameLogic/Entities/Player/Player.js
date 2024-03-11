@@ -12,14 +12,8 @@ class Player extends Living{
     * 
     */
     constructor(scene, originInfo, config){
-        super(scene, originInfo, config.name, config.size, config.defaultVelocity);
-        this.config = config;
-        this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
-        this.setBounce(0.1);
+        super(scene, originInfo, config);
 
-        this.setMaxHealth(config.maxHealth);
-        this.setStateMachine(...config.possibleStates);
-        this.setSpriteAnimations(config.animations);
         this.setWeapons(config.weapons);
 
         this.pressedKeyHistory = [];
@@ -98,78 +92,6 @@ class Player extends Living{
      */
     getCurrentWeapon(){
         return this.currentWeapon;
-    }
-
-    /**
-     * Checks if the living sprite have been impacted by a projectile or not.
-     * @param {Living} shooter The living object which has shot THIS living object.
-     */
-    evalProjectileCollision(shooter){
-        let thisObject = this;
-        this.getScene().physics.collide(this, shooter.getProjectiles2D(),
-            function(sprite, projectile){
-                let index = shooter.getProjectiles2D().getChildren().indexOf(projectile);
-                let projectile3D = shooter.getProjectiles3D().getChildren()[index];
-                thisObject.__checkDamage(
-                    projectile,
-                    projectile3D,
-                    shooter.getBulletProperties(),
-                    shooter.getDistanceLimits(),
-                    shooter.getDistanceToPlayer()
-                );
-            }
-        );
-    }
-
-    /**
-     * This method is called when a projectile has collided with a living sprite,
-     * here he health and the state of the living sprite is determined by the
-     * damage and limit distances of the projected projectiles.
-     * @param {Projectile} projectile 
-     * @param {Number} damage 
-     * @param {Object} distanceLimits 
-     * @param {Number} currentDistance
-     */
-    __checkDamage(projectile, projectile3D, bulletProperties, distanceLimits, currentDistance){
-        projectile.body.reset(-100, -100); 
-
-        projectile.setActive(false);
-        projectile.setVisible(false);
-
-        projectile3D.body.reset(-100, -100); 
-
-        projectile3D.setActive(false);
-        projectile3D.setVisible(false);
-
-        let damage = bulletProperties.damage;
-
-        if(currentDistance > distanceLimits.min && currentDistance < distanceLimits.max){
-            damage *= 220/currentDistance;
-            // console.log(`${this} Normal damage ${damage}`);
-        }else if(currentDistance >= distanceLimits.max){
-            damage *= 1/distanceLimits.max;
-            // console.log(`${this} Minimal damage ${damage}`);
-        }else if(currentDistance <= distanceLimits.min){
-            damage *= bulletProperties.critical * 220/currentDistance;
-            // console.log(`${this} Critical damage ${damage}`);
-        }
-
-        this.addDamageReceived(damage);
-
-        if(this.getHealth() - damage <= 0){
-            this.setHealth(0);
-            
-            this.getSpriteSounds("death").playSound();
-
-            this.isAlive = false;
-
-        }else{
-            this.getSpriteSounds("hurt").playSound();
-            this.getHUD().displayHurtRedScreen();
-            this.setHealth(this.getHealth() - damage);
-        }
-
-        this.getHUD().setHUDElementValue("health", this.getHealth(), true, "%");
     }
 
     /**

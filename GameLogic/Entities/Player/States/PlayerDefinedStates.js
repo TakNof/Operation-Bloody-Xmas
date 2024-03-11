@@ -80,6 +80,10 @@ class PlayerWalkState extends PlayerState{
             this.player.stateMachine.transitionToState('Idle');
         }
 
+        if(!this.player.getSpriteSounds("Walk").sound.isPlaying && this.player.body.onFloor()){
+            this.player.getSpriteSounds("Walk").playSound(this.player.getPosition());
+        }
+
         if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');

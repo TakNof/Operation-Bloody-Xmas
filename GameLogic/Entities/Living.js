@@ -8,18 +8,23 @@ class Living extends Entity{
     * @constructor
     * @param {Phaser.Scene} scene The scene to place the sprite in the game.
     * @param {{x: Number, y: Number}} originInfo A literal Object with the initial positioning information for the sprite.
-    * @param {String} spriteImgStr An str of the image name given in the preload method of the main class.
-    * @param {Number} size The size of the sprite in pixels.
-    * @param {Number} defaultVelocity The default velocity for the living sprite.
+    * @param {JSON} config The size of the sprite in pixels.
     * 
     */
-    constructor(scene, originInfo, spriteImgStr, size, defaultVelocity){
-        super(scene, originInfo, spriteImgStr);
-        this.defaultVelocity = defaultVelocity;
+    constructor(scene, originInfo, config){
+        super(scene, originInfo, config.name);
+        this.config = config;
 
         scene.physics.add.existing(this, false);
-        this.setOwnSize(size);
+        this.setOwnSize(config.size);
         this.setCollideWorldBounds(true);
+
+        this.setBounce(0.1);
+        this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
+        this.setMaxHealth(config.maxHealth);
+        this.setSpriteAnimations(config.animations);
+        this.setSpriteSounds(config.name, config.sounds);
+        this.setStateMachine(...config.possibleStates);
         
         this.children = [];
         this.damagedTimeHistory = [];
@@ -318,7 +323,7 @@ class Living extends Entity{
             let recovered = getRndInteger(1, 5) == 1;
     
             if(!this.isStunned){
-                this.isStunned = damageTimeSpan <= 1100 && !recovered;
+                this.isStunned = damageTimeSpan <= 1500 && !recovered;
             }
     
             if(!this.stunnedTimer && this.isStunned && !recovered){
@@ -369,7 +374,7 @@ class Living extends Entity{
                 align: "center",
                 stroke: "#000000",
                 strokeThickness: 2,
-                alpha: 0
+                alpha: 1
             }
         }
         return this.getScene().add.text(this.getPositionX(), this.getPositionY(), text, config).setOrigin(0.5, 0.5);
@@ -385,6 +390,7 @@ class Living extends Entity{
         const target = this.indicativeTexts[textName];
         target.setPosition(this.x, this.y);
         target.setVisible(true);
+        target.setAlpha(1);
         
         return this.getScene().tweens.add({
             targets: target,
@@ -400,7 +406,6 @@ class Living extends Entity{
         });
     }
 
-    
     /**
      * 
      * @param {Number} otherWidth 

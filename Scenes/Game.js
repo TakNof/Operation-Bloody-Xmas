@@ -16,7 +16,7 @@ class Game extends GeneralGameScene{
         this.player.setRaycaster(1);
         // this.player.getStateMachine().printTransitions = true;
 
-        this.skeletons = new EnemyGroup(this, 5, this.walls, this.skeletonConfig);
+        this.skeletons = new EnemyGroup(this, 1, this.walls, this.skeletonConfig);
         // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
