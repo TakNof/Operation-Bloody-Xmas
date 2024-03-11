@@ -14,7 +14,7 @@ class Player extends Living{
     constructor(scene, originInfo, config){
         super(scene, originInfo, config.name, config.size, config.defaultVelocity);
         this.config = config;
-        this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y)
+        this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
         this.setBounce(0.1);
 
         this.setMaxHealth(config.maxHealth);
@@ -46,7 +46,17 @@ class Player extends Living{
                 this.player.getStateMachine().transitionToState("Attack");
             }
         }, this.getScene());
-            }
+
+        this.getScene().input.keyboard.createCombo('PHASER', { resetOnMatch: true });
+
+        this.getScene().input.keyboard.createCombo('TAKNOF', { resetOnMatch: true });
+
+        this.getScene().input.keyboard.on('keycombomatch', function (event) {
+            console.log("phaser has been written: ");
+            console.log(event);
+        });
+
+        }
 
     /**
      * Sets the list of weapons of the player.
@@ -59,6 +69,7 @@ class Player extends Living{
             let weaponClass = this.__checkClassConstructor(`${weapon.type}Weapon`, "Weapon");
             this.weapons[i] = new weaponClass(this.getScene(), weapon.position, weapon);
             this.weapons[i].setVisible(false);
+            this.addChild(this.weapons[i].hitBox);
         }
 
         this.setCurrentWeapon(this.weapons[0]);        
@@ -273,5 +284,9 @@ class Player extends Living{
         this.playerText.x = this.x - 50;
         this.playerText.y = this.y - 100;
         this.playerText.text = `${this.health}`;
+
+        if(!this.body.onFloor() && this.getStateMachine().currentState.stateKey !== "Fall" && this.getVelocityY() > 500){
+            this.getStateMachine().transitionToState('Fall');
+        }
     }
 }

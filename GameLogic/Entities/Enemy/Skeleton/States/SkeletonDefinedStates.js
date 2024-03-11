@@ -296,14 +296,15 @@ class SkeletonAttackState extends EnemyState{
             let rangeAttack = this.enemy.getDistanceToPlayer() - this.enemy.config.attackDistance;
             if(rangeAttack > 20){
                 this.enemy.getStateMachine().transitionToState("Chase");
+                this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackDelay;
             }else if(scene.time.now  - this.enemy.lastAttackTimer >= config.attackRate) {
                 swordHitBox.body.enable = true;
                 this.soundConfig2 = `Attack_${getRndInteger(1, 5)}`;
-                this.enemy.play(this.enemy.getSpriteAnimations("Attack"))
+                this.enemy.play(this.enemy.getSpriteAnimations("Attack"));
 
                 this.idleAnim =  false;
                 this.enemy.lastAttackTimer = scene.time.now;
-    
+
                 this.enemy.on(`animationupdate`, (anim, frame) =>{
                     if(frame.index == config.hitFrame){
                         this.startHit();

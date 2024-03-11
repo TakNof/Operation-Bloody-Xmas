@@ -27,6 +27,15 @@ class Living extends Entity{
         
         this.isAlive = true;
         this.isStunned = false;
+
+        let textsIndicativeTexts = ["Stunned!", "Recovered!", "???", "!!!"];
+
+        this.indicativeTexts = {};
+
+        for(let text of textsIndicativeTexts){
+            this.indicativeTexts[text] = this.createIndicativeText(text);
+            this.indicativeTexts[text].setVisible(false);
+        }
     }
 
     /**
@@ -186,9 +195,9 @@ class Living extends Entity{
     setRaycaster(amountOfRays) {
         this.raycaster = this.getScene().raycasterPlugin.createRaycaster({
             debug: {
-              enabled: true, //enable debug mode
-              maps: true, //enable maps debug
-              rays: true, //enable rays debug
+              enabled: false, //enable debug mode
+              maps: false, //enable maps debug
+              rays: false, //enable rays debug
               graphics: {
                   ray: 0x00ff00, //debug ray color; set false to disable
                   rayPoint: 0xff00ff, //debug ray point color; set false to disable
@@ -315,7 +324,10 @@ class Living extends Entity{
         if(!this.stunnedTimer && this.isStunned && !recovered){
             this.getScene().cameras.main.shake(100, 0.005);
 
-            const stunnedText = this.createIndicativeText("stunned");
+            const stunnedText = this.indicativeTexts["Stunned!"];
+            stunnedText.setPosition(this.x, this.y);
+            stunnedText.setVisible(true);
+
             let stunDuration = getRndInteger(1, 5)*1000;
 
             this.getScene().tweens.add({
@@ -327,7 +339,7 @@ class Living extends Entity{
                 duration: 1000,
                 ease: "Cubic",
                 onComplete: () => {
-                    stunnedText.destroy();
+                    stunnedText.setVisible(false);
                 },
             });
 
@@ -345,7 +357,9 @@ class Living extends Entity{
             });
 
             this.stunnedTimer = setTimeout(() => {
-                const recoveredText = this.createIndicativeText("recovered");
+                const recoveredText = this.indicativeTexts["Recovered!"];
+                recoveredText.setPosition(this.x, this.y);
+                recoveredText.setVisible(true);
 
                 this.getScene().tweens.add({
                     targets: recoveredText,
@@ -356,7 +370,7 @@ class Living extends Entity{
                     duration: 1000,
                     ease: "Cubic",
                     onComplete: () => {
-                        recoveredText.destroy();
+                        recoveredText.setVisible(false);
                     },
                 });
 
@@ -394,11 +408,10 @@ class Living extends Entity{
                 align: "center",
                 stroke: "#000000",
                 strokeThickness: 2,
-                fixedWidth: 100,
                 alpha: 0
             }
         }
-        return this.getScene().add.text(this.getPositionX(), this.getPositionY(), `${text.charAt(0).toUpperCase() + text.slice(1)}!`, config).setOrigin(0.5, 0.5);
+        return this.getScene().add.text(this.getPositionX(), this.getPositionY(), text, config).setOrigin(0.5, 0.5);
     }
 
     
@@ -407,34 +420,34 @@ class Living extends Entity{
      * @param {Number} otherWidth 
      * @param {Number} otherHeight 
      */
-        setOffsetByOrigin(otherWidth, otherHeight = otherWidth){
-            let x;
-            let y;
-    
-            if(otherWidth){
-                x = otherWidth*this.getCustomSpriteOrigin().x - this.body.width/2;
-                y =  otherHeight*this.getCustomSpriteOrigin().y - this.body.height/2;
-            }else{
-                x  = this.width*this.getCustomSpriteOrigin().x - this.body.width/2;
-                y =  this.height*this.getCustomSpriteOrigin().y - this.body.height/2;
-            }
-    
-            if(this.body.offset.x != x || this.body.offset.y != y){
-                this.setOffset(x, y);
-            }
+    setOffsetByOrigin(otherWidth, otherHeight = otherWidth){
+        let x;
+        let y;
+
+        if(otherWidth){
+            x = otherWidth*this.getCustomSpriteOrigin().x - this.body.width/2;
+            y =  otherHeight*this.getCustomSpriteOrigin().y - this.body.height/2;
+        }else{
+            x  = this.width*this.getCustomSpriteOrigin().x - this.body.width/2;
+            y =  this.height*this.getCustomSpriteOrigin().y - this.body.height/2;
         }
-    
-        startAnimationWithOffset(originX, originY, otherWidth, otherHeight = otherWidth) {
-            this.setCustomSpriteOrigin(originX, originY);        
-    
-            this.on("animationstart", (anims, frame) =>{
-                if(this.lastPlayedAnimation !== anims.key && anims.key === this.anims.currentAnim.key){
-                    this.setOffsetByOrigin(otherWidth, otherHeight);
-                    this.lastPlayedAnimation = anims.key;
-                    // console.log("Calling setOffsetByOrigin method");
-                }
-            });
+
+        if(this.body.offset.x != x || this.body.offset.y != y){
+            this.setOffset(x, y);
         }
+    }
+
+    startAnimationWithOffset(originX, originY, otherWidth, otherHeight = otherWidth) {
+        this.setCustomSpriteOrigin(originX, originY);        
+
+        this.on("animationstart", (anims, frame) =>{
+            if(this.lastPlayedAnimation !== anims.key && anims.key === this.anims.currentAnim.key){
+                this.setOffsetByOrigin(otherWidth, otherHeight);
+                this.lastPlayedAnimation = anims.key;
+                // console.log("Calling setOffsetByOrigin method");
+            }
+        });
+    }
 
     /**
      * 

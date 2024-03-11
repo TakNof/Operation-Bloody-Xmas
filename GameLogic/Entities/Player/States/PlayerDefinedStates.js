@@ -31,10 +31,6 @@ class PlayerIdleState extends PlayerState{
                 this.player.play(this.player.getSpriteAnimations("Idle"), true);
             }
         }
-
-        if(this.player.getVelocityY() > 800){
-            this.player.getStateMachine().transitionToState('Fall');
-        }
     }
 
     exitState(){}
@@ -93,14 +89,9 @@ class PlayerWalkState extends PlayerState{
                 this.player.play(this.player.getSpriteAnimations("Walk"), true);
             }
         }
-        
-        if(this.player.getVelocityY() > 800){
-            this.player.getStateMachine().transitionToState('Fall');
-        }
-        
+                
         if(left.isDown ^ a.isDown  && !this.player.flipX){
             this.player.flipX= true;
-            // this.player.setOwnSize(this.player.config.size);
         }else if(right.isDown ^ d.isDown && this.player.flipX){
             this.player.flipX= false;
         }
@@ -108,8 +99,6 @@ class PlayerWalkState extends PlayerState{
         let sign = this.player.flipX ? -1: 1;
 
         this.player.setVelocityX(sign*defaultVelocity);
-
-
     }
 
     exitState(){}
@@ -166,6 +155,12 @@ class PlayerRunState extends PlayerState{
 
         this.player.setVelocityX(sign*defaultVelocity*velocityMultiplier);
 
+        if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
+            this.player.stateMachine.transitionToState('Walk');
+        }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown)){
+            this.player.stateMachine.transitionToState('Idle');
+        }
+
         if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
             if(space.isDown){
                 this.player.stateMachine.transitionToState('Jump');
@@ -175,18 +170,6 @@ class PlayerRunState extends PlayerState{
                 this.player.play(this.player.getSpriteAnimations("Run"), true);
             }
         }
-        
-        if(this.player.getVelocityY() > 800){
-            this.player.getStateMachine().transitionToState('Fall');
-        }
-        
-        if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
-            this.player.stateMachine.transitionToState('Walk');
-        }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown)){
-            this.player.stateMachine.transitionToState('Idle');
-        }
-
-
     }
 
     exitState(){}
@@ -302,7 +285,6 @@ class PlayerFallState extends PlayerState{
 
     updateState(){
         if(this.player.body.onFloor()){
-            this.player.stop();
             this.player.getStateMachine().transitionToState("Land");
         }
 
@@ -401,13 +383,15 @@ class PlayerSlideState extends PlayerState{
         let sign = this.player.flipX ? -1: 1;
         
         this.player.setFrictionX(1);
-        this.player.setOwnSize({x: 128, y: 64});
+        this.player.setOwnSize({x: 90, y: 64});
+        this.player.startAnimationWithOffset(0.5, 0.7, this.player.size.x, this.player.size.y);
 
-        this.player.startAnimationWithOffset(0.5, 0.8, 128, 64);
+        this.player.body.updateFromGameObject();
+
         this.player.play(this.player.getSpriteAnimations("Slide"), true);
 
         this.player.on(`animationupdate`, (anim, frame) =>{
-            if(frame.index == slideConfig.slideFrame){
+            if(frame.index == slideConfig.slideFrame && !this.player.body.onWall()){
                 
                 this.player.setVelocityX(sign*(defaultVelocity* velocityMultiplier + slideConfig.slideDashAdder));
         
@@ -417,38 +401,19 @@ class PlayerSlideState extends PlayerState{
     }
 
     updateState(){
-        const {a, d, left, right, shift, space} = this.player.config.controls;
         const {scene} = this.player;
-        const {defaultVelocity, velocityMultiplier} = this.player.config;
         const {slideConfig} = this.player.config;
 
-        let sign = this.player.flipX ? -1: 1;
-
-        if(this.player.getVelocityX() != sign*defaultVelocity * velocityMultiplier){
-            this.player.setVelocityX(this.player.getVelocityX() - sign*10);
+        if(scene.time.now - this.player.lastSlideTimer >= slideConfig.slideDuration && this.player.body.onFloor() || this.player.body.onWall() ){
+            this.player.play(this.player.getSpriteAnimations("Run"), true);
+            this.player.getStateMachine().transitionToState('Run'); 
         }
-
-        if(scene.time.now - this.player.lastSlideTimer >= slideConfig.slideDuration || this.player.body.onWall()){
-            this.player.play(this.player.getSpriteAnimations("Idle"), true);
-            if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && shift.isDown){
-                this.player.stateMachine.transitionToState('Run');
-            }else if((left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
-                this.player.stateMachine.transitionToState('Walk');
-            }else if(!(left.isDown ^ right.isDown) ^ (a.isDown ^ d.isDown) && !shift.isDown){
-                this.player.stateMachine.transitionToState('Idle');
-            }else if(space.isDown && this.player.body.onFloor()){
-                this.player.stateMachine.transitionToState('Jump');
-            }
-        }
-
-
     }
 
     exitState(){
         this.player.setFrictionX(0);
         this.player.y -= this.player.body.height/2;
         this.player.setOwnSize(this.player.config.size);
-        this.player.body.reset(this.player.x, this.player.y);
     }
 
     getNextState(){
@@ -489,18 +454,15 @@ class PlayerAttackState extends PlayerState{
         this.player.startAnimationWithOffset(0.5, 0.6, this.player.config.size.x, this.player.config.size.y);
         this.player.play(this.player.getSpriteAnimations("Attack"));
         this.player.isAttacking = true;
-
-        // if(this.player.body.onFloor()){
-        //     this.player.y -=32;
-        // }
-
+        this.player.getCurrentWeapon().hitBox.body.enable = true;
+        
         this.player.on(`animationupdate`, (anim, frame) =>{
-            // console.log(this.player.originX, this.player.originY)
-            // console.log(this.player);
             if(frame.index == this.player.getCurrentWeapon().config.hitFrame && anim.key === this.player.getSpriteAnimations("Attack")){
-                    
-                // this.checkHittingEnemies();
-                
+                this.player.getCurrentWeapon().getSpriteSounds("Swing").sound.setDetune(getRndInteger(-4,4)*100);
+                this.player.getCurrentWeapon().getSpriteSounds("Swing").playSound({x: this.player.getCurrentWeapon().hitBox.x, y: this.player.getCurrentWeapon().hitBox.y});
+
+                this.checkHittingEnemies();
+
                 this.player.off("animationupdate");
                 this.ableToChange = true;
             }
@@ -508,6 +470,7 @@ class PlayerAttackState extends PlayerState{
 
         this.player.on(`animationcomplete-${this.player.getSpriteAnimations("Attack")}`, ()=>{
             this.player.isAttacking = false;
+            this.player.getCurrentWeapon().hitBox.body.enable = false;
             this.player.off(`animationcomplete-${this.player.getSpriteAnimations("Attack")}`);
         });
 
@@ -519,7 +482,9 @@ class PlayerAttackState extends PlayerState{
         });
     }
 
-    updateState(){        
+    updateState(){
+        this.updateChildren();
+        
         if(this.ableToChange && this.player.isAlive){
             this.player.getStateMachine().transitionToState("Idle");
         }
@@ -528,10 +493,16 @@ class PlayerAttackState extends PlayerState{
     checkHittingEnemies(){
         const {scene, config} = this.player;
 
-        scene.physics.overlap(this.player.getCurrentWeapon(), scene.skeletons, (weapon, enemy) =>{
+        scene.physics.overlap(this.player.getCurrentWeapon().hitBox, scene.skeletons, (weapon, enemy) =>{
             if(!enemy.isStunned){
-                enemy.lastAttackTimer = -enemy.config.attackRate;
+                // enemy.lastAttackTimer = enemy.config.attackRate - (enemy.scene.time.now - enemy.lastAttackTimer);
             }
+
+            // console.log(enemy.config.attackRate - (enemy.scene.time.now - enemy.lastAttackTimer));
+            let hitSound = `Hit_${getRndInteger(1,3)}`;
+
+            this.player.getCurrentWeapon().getSpriteSounds(hitSound).sound.setDetune(getRndInteger(-4,4)*100);
+            this.player.getCurrentWeapon().getSpriteSounds(hitSound).playSound(enemy.getPosition());
 
             enemy.getStateMachine().transitionToState("Damaged");
             enemy.decreaseHealthBy(this.player.getCurrentWeapon().config.damage);

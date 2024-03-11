@@ -17,6 +17,8 @@ class Weapon extends Entity{
 
         this.config = config;
 
+        this.setSpriteSounds(config.name, config.sounds);
+
         this.setOrigin(this.config.originPosition.x, this.config.originPosition.y);
     }
 }

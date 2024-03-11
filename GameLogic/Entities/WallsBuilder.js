@@ -74,7 +74,7 @@ class WallsBuilder{
                     
                 }else{
                     wallStart.x = 15;
-                    wallStart.y = getRndInteger(0, 8);
+                    wallStart.y = 19;
         
                     blockExtension.x = 3;
                     blockExtension.y = 3;
@@ -93,8 +93,8 @@ class WallsBuilder{
             for(let i = 0; i < this.wallNumberRatio.y; i++){
                 for(let j = 0; j < this.wallNumberRatio.x; j++){
                     if(this.wallMatrix[i][j] === true){
-                        wallPosition.x = (j*32) + 16;
-                        wallPosition.y = (i*32) + 16;
+                        wallPosition.x = this.blockSize*(j + 0.5);
+                        wallPosition.y = this.blockSize*(i + 0.5);
                         this.walls.create(wallPosition.x, wallPosition.y, this.spriteImgStr);
                     }
                 }

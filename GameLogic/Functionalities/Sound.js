@@ -13,20 +13,24 @@ class Sound{
                 source: {
                     x: spritePosition.x,
                     y: spritePosition.y,
+                    panningModel: 'HRTF',
+                    distanceModel: 'inverse',
                     orientationX: 0,
                     orientationY: 0,
                     orientationZ: -1,
-                    // distanceModel: 'inverse',
-                    refDistance: 6,
+                    refDistance: 100,
                     rolloffFactor: 1,
                     coneInnerAngle: 180,
                     coneOuterAngle: 280,
-                    coneOuterGain: 0.5
+                    coneOuterGain: 0.8
                 }
             }
+            this.sound.play(config);
+        }else{
+            this.sound.play();
         }
 
-        this.sound.play(config);
+        
     }
 
     stopSound(){

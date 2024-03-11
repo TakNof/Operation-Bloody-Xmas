@@ -1,10 +1,10 @@
 class GeneralGameScene extends Phaser.Scene{
-    constructor(){
-        super({key: "GeneralGameScene"});
+    constructor(key){
+        super({key: key});
     }
 
     preload(){
-        this.load.image("wall", "./assets/wall.png", {frameWidth: 32, frameHeight: 32});
+        this.load.image("wall", "./assets/Base Tile.png", {frameWidth: 64, frameHeight: 64});
         this.load.image("player", "./assets/Player/Sprites/Idle.png");
 
         let controls = this.input.keyboard.createCursorKeys();
@@ -13,14 +13,34 @@ class GeneralGameScene extends Phaser.Scene{
             controls[key] = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes[key.toUpperCase()]);
         }
 
+        let PineSwordSounds = [
+            {name: "Hit", amount: 3},
+            {name: "Swing", amount: 1},
+        ];
+
+        let PineSwordRoute = "assets/Player/Weapons/Pine Sword/Sounds/"
+        let PineSwordSoundsNames = [];
+        for(let sound of PineSwordSounds){
+            for(let i = 0; i < sound.amount; i++){
+                let fullname = sound.amount > 1 ? `${sound.name}_${i + 1}`: sound.name;
+                PineSwordSoundsNames.push(fullname);
+                this.load.audio(`pineSword_${fullname}`, `${PineSwordRoute}${fullname}.mp3`);
+            }
+        }
+
         const PineSword = {
-            name: "PineSword",
+            name: "pineSword",
             type: "Melee",
+            size: {x: 42, y: 96},
             position: {x: 30, y: 10, angleOffset: Math.PI/4},
             originPosition: {x: 0.5, y: 0.5},
-            damage: 40,
+            hitBoxConfig:{
+                position: {x: 40, y: -20},
+                size: {x: 80, y: 150}
+            },
+            damage: 80,
             hitFrame: 6,
-            soundDir: "",
+            sounds: PineSwordSoundsNames,
             spriteDir: "./assets/Player/Weapons/Pine Sword/Sprite/Pine Sword.png"
         }
 
@@ -35,7 +55,7 @@ class GeneralGameScene extends Phaser.Scene{
             maxHealth: 100,
             jumpConfig: {
                 jumpFrame: 3,
-                jumpVelocity: -600,
+                jumpVelocity: -650,
             },
             slideConfig: {
                 slideFrame: 3,
@@ -90,6 +110,7 @@ class GeneralGameScene extends Phaser.Scene{
         this.skeletonConfig = {
             name: "skeleton",
             size: {x: 20, y: 48},
+            originPosition: {x: 0.5, y: 0.5},
             defaultVelocity: 100,
             velocityMultiplier: 1.5,
             maxHealth: 300,
