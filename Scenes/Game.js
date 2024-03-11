@@ -15,10 +15,9 @@ class Game extends GeneralGameScene{
         this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.1}, this.playerConfig);
         this.player.setRaycaster(1);
         // this.player.getStateMachine().printTransitions = true;
-    
-        // this.skeleton = new Skeleton(this, {x: canvasSize.height*4*0.015, y: canvasSize.height*4*0.8}, this.skeletonConfig);
 
-        this.skeletons = new EnemyGroup(this, 2, this.walls, this.skeletonConfig);
+        this.skeletons = new EnemyGroup(this, 5, this.walls, this.skeletonConfig);
+        // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         // this.player.getRaycaster().mapGameObjects(this.skeleton, true );

@@ -27,6 +27,7 @@ class Living extends Entity{
         
         this.isAlive = true;
         this.isStunned = false;
+        this.isCheckingStunning = false;
 
         let textsIndicativeTexts = ["Stunned!", "Recovered!", "???", "!!!"];
 
@@ -284,9 +285,9 @@ class Living extends Entity{
 
         this.setTint(0xeb0e0e);
 
-        setTimeout(() => {
+        this.scene.time.delayedCall(200, () =>{
             this.clearTint();
-        }, 200);
+        });
     }
 
     addDamagedTimeToHistory(){
@@ -305,100 +306,60 @@ class Living extends Entity{
     }
 
     checkStunning(){
-        let damageTimeSpan = 0;
-
-        if(this.getDamagedTimeHistory().length < 4){
-        return;
-        }
-
-        for(let i = 0; i < 4; i++){
-            damageTimeSpan -= this.getDamagedTimeHistory()[i];
-        }
-
-        let recovered = getRndInteger(1, 5) == 1;
-
-        if(!this.isStunned){
-            this.isStunned = damageTimeSpan <= 50 && !recovered;
-        }
-
-        if(!this.stunnedTimer && this.isStunned && !recovered){
-            this.getScene().cameras.main.shake(100, 0.005);
-
-            const stunnedText = this.indicativeTexts["Stunned!"];
-            stunnedText.setPosition(this.x, this.y);
-            stunnedText.setVisible(true);
-
-            let stunDuration = getRndInteger(1, 5)*1000;
-
-            this.getScene().tweens.add({
-                targets: stunnedText,
-                y: stunnedText.y - 50,
-                alpha: 0,
-                scaleX: 0.5,
-                scaleY: 0.5,
-                duration: 1000,
-                ease: "Cubic",
-                onComplete: () => {
-                    stunnedText.setVisible(false);
-                },
-            });
-
-            this.getScene().tweens.add({
-                targets: this,
-                duration: stunDuration,
-                yoyo: true,
-                repeat: -1,
-                onYoyo: () => {
-                    this.clearTint();
-                },
-                onRepeat: () => {
-                    this.setTint(0xcad4a5);
-                }
-            });
-
-            this.stunnedTimer = setTimeout(() => {
-                const recoveredText = this.indicativeTexts["Recovered!"];
-                recoveredText.setPosition(this.x, this.y);
-                recoveredText.setVisible(true);
-
-                this.getScene().tweens.add({
-                    targets: recoveredText,
-                    y: recoveredText.y - 50,
-                    alpha: 0,
-                    scaleX: 0.5,
-                    scaleY: 0.5,
-                    duration: 1000,
-                    ease: "Cubic",
-                    onComplete: () => {
-                        recoveredText.setVisible(false);
-                    },
-                });
-
-                clearInterval(this.tintInterval);
-                clearTimeout(this.stunnedTimer);
-
-                this.isStunned = false;
-                this.clearTint();               
-            }, stunDuration);
+        if(!this.isCheckingStunning && this.getDamagedTimeHistory().length == 4){
+            this.isCheckingStunning = true;
             
-            let tinted = true;
-            this.tintInterval = setInterval(() => {
-                if(tinted){
-                    this.clearTint();
-                }else{
-                    this.setTint(0xc98ff7);
-                }
+            let damageTimeSpan = 0;
+    
+            for(let i = 0; i < 4; i++){
+                damageTimeSpan = this.getDamagedTimeHistory()[i] - damageTimeSpan;
+            }
+    
+            let recovered = getRndInteger(1, 5) == 1;
+    
+            if(!this.isStunned){
+                this.isStunned = damageTimeSpan <= 1100 && !recovered;
+            }
+    
+            if(!this.stunnedTimer && this.isStunned && !recovered){
+                this.getScene().cameras.main.shake(100, 0.005);
+    
+                this.displayIndicativeTextTween("Stunned!");
+    
+                let stunDuration = getRndInteger(1, 5)*1000;
+    
+                this.tintInterval = this.getScene().tweens.add({
+                    targets: this,
+                    tint: 0xcad4a5,
+                    duration: 200,
+                    repeat: -1, 
+                    yoyo: true
+                });
+    
+    
+                this.stunnedTimer = this.scene.time.delayedCall(stunDuration, () =>{
+                    if(this.isAlive){
+                        this.displayIndicativeTextTween("Recovered!");
+                    }  
+    
+                    this.isStunned = false;
+                    this.clearTint(); 
+    
+                    this.tintInterval.stop();
+                    this.stunnedTimer.destroy();    
+                });
+            }
 
-                if(!this.isAlive){
-                    clearInterval(this.tintInterval);
-                    clearTimeout(this.stunnedTimer);
-                }
-
-                tinted = !tinted;
-            }, 100); 
+            this.isCheckingStunning = false;
         }
     }
 
+    /**
+     * Method that allows the creation of and indicative text.
+     * @param {Phaser.Text} text
+     * @param {Object} config
+     * @returns 
+     */
     createIndicativeText(text, config){
         if(!config){
             config = {
@@ -412,6 +373,31 @@ class Living extends Entity{
             }
         }
         return this.getScene().add.text(this.getPositionX(), this.getPositionY(), text, config).setOrigin(0.5, 0.5);
+    }
+
+    /**
+     * Method that returns the tween animation for the indicative text
+     * @param {String} textName 
+     * @param {Number} duration 
+     * @returns 
+     */
+    displayIndicativeTextTween(textName, duration = 1000){
+        const target = this.indicativeTexts[textName];
+        target.setPosition(this.x, this.y);
+        target.setVisible(true);
+        
+        return this.getScene().tweens.add({
+            targets: target,
+            y: target.y - 50,
+            alpha: 0,
+            scaleX: 0.5,
+            scaleY: 0.5,
+            duration: duration,
+            ease: "Cubic",
+            onComplete: () => {
+                target.setVisible(false);
+            },
+        });
     }
 
     

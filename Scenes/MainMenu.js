@@ -7,6 +7,8 @@ class MainMenu extends Phaser.Scene{
         this.load.image("MainMenuBG", "./assets/MainMenu/Main Menu BG.png");
         this.load.image("GameLogo", "./assets/MainMenu/Game Logo.png")
         this.load.image("PlayButton", "./assets/MainMenu/Play Button.png");
+        this.load.audio("PlayButtonSound", "./assets/MainMenu/PlayButtonSound.mp3");
+
         this.load.audio("MainMenuTheme", "./assets/MainMenu/Main Menu Theme.mp3");
     }
     
@@ -20,6 +22,7 @@ class MainMenu extends Phaser.Scene{
         this.playButton = this.add.image(canvasSize.width/2, canvasSize.height*0.8, "PlayButton");
         this.playButton.setAlpha(0);
         this.playButton.setScale(0.7);
+        this.playButtonSound =  this. sound.add("PlayButtonSound");
 
 
         this.playButton.on('pointerover', () => {
@@ -31,8 +34,14 @@ class MainMenu extends Phaser.Scene{
         });
 
         this.playButton.on('pointerdown', () => {
-            this.stopScene();
-          });
+            this.playButtonSound.play();
+
+            this.cameras.main.fadeOut(4000, 0, 0, 0, () =>{
+                this.time.delayedCall(4000, () =>{
+                    this.stopScene();
+                });
+            });
+        });
 
         this.cameras.main.fadeIn(4000, 0, 0, 0);
 
@@ -76,9 +85,17 @@ class MainMenu extends Phaser.Scene{
    }
 
    stopScene() {
-        this.cameras.main.fadeOut(4000, 0, 0, 0, () => {
-            this.scene.start("Game")
-            this.scene.stop();
+
+        this.tweens.add({
+            targets: [this.mainThemeMusic, this.playButtonSound],
+            volume: 0,
+            duration: 2000,
+            ease: "Sinusoidal",
+            onComplete: () => {
+                this.mainThemeMusic.stop();
+                this.scene.start("Game")
+                this.scene.stop();
+            },
         });
     }
 }

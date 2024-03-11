@@ -12,8 +12,8 @@ let config = {
     width: canvasSize.width,
     height: canvasSize.height,
     pixelArt: true,
-    scene: [MainMenu, GeneralGameScene, Game],
-    // scene: [Game],
+    // scene: [MainMenu, GeneralGameScene, Game],
+    scene: [Game],
     plugins: {
         scene: [
             {

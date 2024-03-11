@@ -277,10 +277,10 @@ class SkeletonAttackState extends EnemyState{
     enterState(){
         this.soundConfig1 = `Idle_${getRndInteger(1, 3)}`;
         this.idleAnim = true;
-        this.enemy.setVelocityX(0);
     }
 
     updateState(){
+        this.enemy.setVelocityX(0);
         const {scene, config, swordHitBox} = this.enemy;
         const {player} = this.enemy.getScene();
         this.updateChildren();
@@ -296,7 +296,7 @@ class SkeletonAttackState extends EnemyState{
             let rangeAttack = this.enemy.getDistanceToPlayer() - this.enemy.config.attackDistance;
             if(rangeAttack > 20){
                 this.enemy.getStateMachine().transitionToState("Chase");
-                this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackDelay;
+                this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackRate;
             }else if(scene.time.now  - this.enemy.lastAttackTimer >= config.attackRate) {
                 swordHitBox.body.enable = true;
                 this.soundConfig2 = `Attack_${getRndInteger(1, 5)}`;
@@ -322,7 +322,7 @@ class SkeletonAttackState extends EnemyState{
 
     exitState(){
         if(this.enemy.isStunned){
-            this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackDelay;
+            this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackRate;
         }
     }
 
@@ -429,7 +429,7 @@ class SkeletonDamagedState extends EnemyState{
 
         this.enemy.addDamagedTimeToHistory();
         this.enemy.checkStunning();
-        this.enemy.on(`animationcomplete-${this.enemy.getSpriteAnimations("Damaged")}`, ()=>{
+        this.enemy.on(`animationcomplete-${this.enemy.getSpriteAnimations("Damaged")}`, (anim, frame)=>{
             if(this.enemy.isStunned){
                 this.enemy.getStateMachine().transitionToState("Stunned");
             }else{
@@ -481,7 +481,7 @@ class SkeletonStunnedState extends EnemyState{
         this.enemy.setVelocityX(0);
         this.enemy.play(this.enemy.getSpriteAnimations("Idle"), true);
         if(!this.enemy.isStunned){
-            this.enemy.getStateMachine().transitionToState("Patrol");
+            this.enemy.getStateMachine().transitionToState("Chase");
         }
     }
 

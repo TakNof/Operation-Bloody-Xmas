@@ -17,17 +17,6 @@ class GeneralGameScene extends Phaser.Scene{
             {name: "Hit", amount: 3},
             {name: "Swing", amount: 1},
         ];
-
-        let PineSwordRoute = "assets/Player/Weapons/Pine Sword/Sounds/"
-        let PineSwordSoundsNames = [];
-        for(let sound of PineSwordSounds){
-            for(let i = 0; i < sound.amount; i++){
-                let fullname = sound.amount > 1 ? `${sound.name}_${i + 1}`: sound.name;
-                PineSwordSoundsNames.push(fullname);
-                this.load.audio(`pineSword_${fullname}`, `${PineSwordRoute}${fullname}.mp3`);
-            }
-        }
-
         const PineSword = {
             name: "pineSword",
             type: "Melee",
@@ -38,13 +27,18 @@ class GeneralGameScene extends Phaser.Scene{
                 position: {x: 40, y: -20},
                 size: {x: 80, y: 150}
             },
-            damage: 80,
+            damage: 40,
             hitFrame: 6,
-            sounds: PineSwordSoundsNames,
+            sounds: this.loadAudios("pineSword", "./assets/Player/Weapons/Pine Sword/Sounds/", PineSwordSounds),
             spriteDir: "./assets/Player/Weapons/Pine Sword/Sprite/Pine Sword.png"
         }
 
         let weapons = [PineSword];
+
+        let playerSounds = [
+            {name: "Walk", amount: 1},
+            {name: "Run", amount: 1},
+        ];
 
         this.playerConfig = {
             name: "player",
@@ -63,7 +57,7 @@ class GeneralGameScene extends Phaser.Scene{
                 slideDuration: 500,
                 slideDashAdder: 400,
             },
-            possibleStates: ["Idle", "Walk", "Jump","Fall", "Land", "Run", "Slide", "Attack", "Dead"],
+            possibleStates: ["Idle", "Walk", "Jump", "Fall", "Land", "Run", "Slide", "Attack", "Dead"],
             animations: [
                 {name: "Idle", animationParams: {end: 5, framerate: 15}},
                 {name: "Walk", animationParams: {end: 14, framerate: 30, repeat: -1}},
@@ -73,10 +67,11 @@ class GeneralGameScene extends Phaser.Scene{
                 {name: "Land", animationParams: {end: 11, framerate: 20,}},
                 {name: "Slide", animationParams: {end: 5, framerate: 30}},
                 {name: "Attack", animationParams: {end: 11, framerate: 30}},
-                {name: "Dead", animationParams: {end: 17, framerate: 20}}
+                {name: "Dead", animationParams: {end: 16, framerate: 20}}
             ],
             controls: controls,
-            weapons: weapons
+            weapons: weapons,
+            sounds: this.loadAudios("player", "./assets/Player/Sounds/  ", playerSounds),
         }
 
         for(let animation of this.playerConfig.animations){
@@ -97,16 +92,7 @@ class GeneralGameScene extends Phaser.Scene{
             {name: "Damaged", amount: 4},
             {name: "Dead", amount: 1}
         ];
-        let skeletonSoundsRoute = "assets/Enemy/Skeleton/Sounds/"
-        let skeletonSoundsNames = [];
-        for(let sound of skeletonSounds){
-            for(let i = 0; i < sound.amount; i++){
-                let fullname = sound.amount > 1 ? `${sound.name}_${i + 1}`: sound.name;
-                skeletonSoundsNames.push(fullname);
-                this.load.audio(`skeleton_${fullname}`, `${skeletonSoundsRoute}${fullname}.mp3`);
-            }
-        }
- 
+
         this.skeletonConfig = {
             name: "skeleton",
             size: {x: 20, y: 48},
@@ -123,19 +109,40 @@ class GeneralGameScene extends Phaser.Scene{
             swordHitBoxInfo: {x: 50, y: 16, width: 50, height: 40},
             possibleStates: ["Idle", "Patrol", "Chase", "Search", "Attack", "Block", "Damaged","Stunned", "Dead"],
             animations: [
-                {name: "Idle", animationParams: {end: 4, framerate: 10}},
-                {name: "Walk", animationParams: {end: 4, framerate: 10, repeat: -1}},
-                {name: "Attack", animationParams: {end: 8, framerate: 30}},
-                {name: "Blocking", animationParams: {end: 4, framerate: 15}},
-                {name: "Damaged", animationParams: {end: 4, framerate: 15}},
-                {name: "Dead", animationParams: {end: 4, framerate: 15}}
+                {name: "Idle", animationParams: {end: 3, framerate: 10}},
+                {name: "Walk", animationParams: {end: 3, framerate: 10, repeat: -1}},
+                {name: "Attack", animationParams: {end: 7, framerate: 30}},
+                {name: "Blocking", animationParams: {end: 3, framerate: 15}},
+                {name: "Damaged", animationParams: {end: 3, framerate: 15}},
+                {name: "Dead", animationParams: {end: 3, framerate: 15}}
             ],
-            sounds: skeletonSoundsNames
+            sounds: this.loadAudios("skeleton", "./assets/Enemy/Skeleton/Sounds/", skeletonSounds),
         }
 
         for(let animation of this.skeletonConfig.animations){
             let route = `./assets/Enemy/Skeleton/Animations/${animation.name}/${animation.name}`;
             this.load.atlas(`skeleton_${animation.name}`, `${route}.png`, `${route}.json`);
         }
+    }
+
+    /**
+     * 
+     * @param {String} spriteName The name of the asociated sprite to relate the sound.
+     * Eg: If you're creating the sounds for the player, you have to put here "player".
+     * @param {String} route The route where the sounds are located
+     * @param {JSON} listOfSoundsParameters A json with the parameters of the sounds you wish to create.
+     * @return {Array<String>} An array with the sounds' names.
+     */
+    loadAudios(spriteName, route, listOfSoundsParameters){
+        let soundNames = [];
+        for(let sound of listOfSoundsParameters){
+            for(let i = 0; i < sound.amount; i++){
+                let fullname = sound.amount > 1 ? `${sound.name}_${i + 1}`: sound.name;
+                soundNames.push(fullname);
+                this.load.audio(`${spriteName}_${fullname}`, `${route}${fullname}.mp3`);
+            }
+        }
+
+        return soundNames;
     }
 }
