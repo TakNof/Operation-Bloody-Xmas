@@ -568,6 +568,26 @@ class SkeletonDeadState extends EnemyState{
             this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
         }
 
+        if(getRndInteger(1, 2) == 1){
+            let itemIsMilk = getRndInteger(1, 3) < 2;
+
+            let item;
+            if(itemIsMilk){
+                item = this.enemy.scene.milks.get();
+            }else{
+                item = this.enemy.scene.cookies.get();
+            }
+
+            if(item){
+                item.setActive(true);
+                item.setVisible(true);
+                
+                item.x = this.enemy.x;
+                item.y = this.enemy.y;
+            }
+            
+        }
+
         this.enemy.body.enable = false;
 
         setTimeout(() => {
@@ -577,8 +597,9 @@ class SkeletonDeadState extends EnemyState{
                 duration: 5000,
                 ease: "Cubic",
                 onComplete: () => {
-                    this.enemy.destroyChildren();
-                    this.enemy.destroy();
+                    this.enemy.setPosition(0, 0)
+                    this.enemy.setActive(false);
+                    this.enemy.setVisible(false);
                 },
             });
         }, 1000);

@@ -26,7 +26,7 @@ class Player extends Living{
         this.originMarker = this.scene.add.circle(this.x, this.y, 5, 0x11d445); //green
 
         this.playerText = this.scene.add.text(0, 0, `${this.health}`, {
-            fontSize: '48px',
+            fontSize: '24px',
             fill: '#000000'
         });
 
@@ -190,25 +190,61 @@ class Player extends Living{
     update(){
         this.getStateMachine().update();
         this.getScene().sound.listenerPosition.set(this.getPositionX(), this.getPositionY());
+
+        this.grabItem();
+
         for(let ray of this.getRaycaster().rays){
             ray.setOrigin(this.getPositionX(), this.getPositionY());
             ray.cast()
         }
-        this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
+        // this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
 
-        let offsetX = this.body.center.x - this.body.width/2;
-        let offsetY = this.body.center.y - this.body.height/2;
+        // let offsetX = this.body.center.x - this.body.width/2;
+        // let offsetY = this.body.center.y - this.body.height/2;
 
-        this.offsetMarker.setPosition(offsetX, offsetY);
+        // this.offsetMarker.setPosition(offsetX, offsetY);
         
-        this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
+        // this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
 
-        this.playerText.x = this.x - 50;
+        this.playerText.x = this.x - 60;
         this.playerText.y = this.y - 100;
-        this.playerText.text = `${this.health}`;
+        this.playerText.text = `HP: ${this.getHealth()}, SH: ${this.getShield()}`;
 
         if(!this.body.onFloor() && this.getStateMachine().currentState.stateKey !== "Fall" && this.getVelocityY() > 500){
             this.getStateMachine().transitionToState('Fall');
         }
+    }
+
+    grabItem(){
+        if(this.scene.cookies.getFirstAlive()){
+            this.grabCookies();
+        }
+
+        if(this.scene.milks.getFirstAlive()){
+            this.grabMilk();
+        }
+    }
+
+    grabCookies(){
+        this.scene.physics.overlap(this, this.scene.cookies, (player, cookie) =>{
+            this.repairShield(cookie.ShieldRegenAmount);
+            cookie.setVisible(false);
+            cookie.setActive(false);
+
+            cookie.x = 0;
+            cookie.y = 0;
+        });
+    }
+
+    grabMilk(){
+        this.scene.physics.overlap(this, this.scene.milks, (player, milk) =>{
+            this.heal(milk.HealthRegenAmount);
+            milk.setVisible(false);
+            milk.setActive(false);
+
+            milk.x = 0;
+            milk.y = 0;
+        });
+
     }
 }

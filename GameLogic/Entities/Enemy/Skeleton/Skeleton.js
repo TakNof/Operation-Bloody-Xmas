@@ -8,7 +8,8 @@ class Skeleton extends Enemy{
     */
     constructor(scene, originInfo, config){
         super(scene, originInfo, config);
-        this.setOffset(this.width - this.body.width - 65, this.height - this.body.height - 5); 
+        this.setOffset(this.width - this.body.width - 65, this.height - this.body.height - 5);
+        this.createSwordHitBox(config.swordHitBoxInfo.x, config.swordHitBoxInfo.y, config.swordHitBoxInfo.width, config.swordHitBoxInfo.height);
     }
 
     onWallFound(){

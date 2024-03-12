@@ -145,7 +145,7 @@ class WallsBuilder{
     /**
      * This method creates the base matrix fulled of booleans to create the wall.
      */
-    setWallMatrix(){    
+        setWallMatrix(){    
         this.wallMatrix = [];
     
         let row = Array(this.wallNumberRatio.x);

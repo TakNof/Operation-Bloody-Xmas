@@ -99,19 +99,16 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
         super(scene.physics.world, scene);
         this.maxSize = amount;
 
-        this.wallMatrix = wallObject.getWallMatrix().slice();
-        let wallNumberRatio = wallObject.getWallNumberRatio();
+        this.wallObject = wallObject;
 
         let className = this.__checkClassConstructor(config.name.charAt(0).toUpperCase() + config.name.slice(1), "Enemy");
         for(let i = 0; i < amount; i++){
-            this.add(new className(scene, this.setInitialPosition(wallNumberRatio), config))
+            this.add(new className(scene, this.setInitialPosition(), config))
         }
 
 
         // this.callAll("setRaycaster", this.wallMatrix, config.angleOffset, 1);
         // this.callAll("setDebug", game.config.physics.arcade.debug);
-        this.callAll("createSwordHitBox", config.swordHitBoxInfo.x, config.swordHitBoxInfo.y, config.swordHitBoxInfo.width, config.swordHitBoxInfo.height);
-        this.callAll("setColliderElements");
 
         scene.physics.add.collider(this, this);
     }
@@ -162,22 +159,21 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
 
     /**
      * Sets the position of the enemy acording to the available spaces in the map.
-     * @param {Number} wallNumberRatio
      * @returns {{x: Number, y: Number}}
      */
-    setInitialPosition(wallNumberRatio) {
+    setInitialPosition() {
         let enemyPosition = {x: 0, y: 0, angleOffset: 0};
 
-        let i = getRndInteger(0, wallNumberRatio.y);
-        let j = getRndInteger(0, wallNumberRatio.x);
+        let i;
+        let j;
 
-        while(this.wallMatrix[i][j]){
-            i = getRndInteger(0, wallNumberRatio.y);
-            j = getRndInteger(0, wallNumberRatio.x);
-        }
+        do{
+            i = getRndInteger(0, this.wallObject.wallNumberRatio.y);
+            j = getRndInteger(0, this.wallObject.wallNumberRatio.x);
+        }while(this.wallObject.wallMatrix[i][j])
 
-        enemyPosition.x = (j*32 + 32);
-        enemyPosition.y = (i*32 + 32);
+        enemyPosition.x = this.wallObject.blockSize*(j + 0.5);
+        enemyPosition.y = this.wallObject.blockSize*(i + 0.5);
 
         return enemyPosition;
     }

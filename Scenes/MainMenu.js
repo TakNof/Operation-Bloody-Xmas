@@ -4,7 +4,7 @@ class MainMenu extends Phaser.Scene{
     }
 
     preload(){
-        this.load.image("MainMenuBG", "./assets/MainMenu/Main Menu BG.png");
+        this.load.image("MainMenuBG", "./assets/MainMenu/MainMenuBG.png");
         this.load.image("GameLogo", "./assets/MainMenu/Game Logo.png")
         this.load.image("PlayButton", "./assets/MainMenu/Play Button.png");
         this.load.audio("PlayButtonSound", "./assets/MainMenu/PlayButtonSound.mp3");

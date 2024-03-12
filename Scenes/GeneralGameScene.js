@@ -27,7 +27,7 @@ class GeneralGameScene extends Phaser.Scene{
                 position: {x: 40, y: -20},
                 size: {x: 80, y: 150}
             },
-            damage: 40,
+            damage: 80,
             hitFrame: 6,
             sounds: this.loadAudios("pineSword", "./assets/Player/Weapons/Pine Sword/Sounds/", PineSwordSounds),
             spriteDir: "./assets/Player/Weapons/Pine Sword/Sprite/Pine Sword.png"
@@ -47,6 +47,7 @@ class GeneralGameScene extends Phaser.Scene{
             defaultVelocity: 200,
             velocityMultiplier: 2,
             maxHealth: 100,
+            maxShield: 150,
             jumpConfig: {
                 jumpFrame: 3,
                 jumpVelocity: -650,
@@ -67,7 +68,7 @@ class GeneralGameScene extends Phaser.Scene{
                 {name: "Land", animationParams: {end: 11, framerate: 20,}},
                 {name: "Slide", animationParams: {end: 5, framerate: 30}},
                 {name: "Attack", animationParams: {end: 11, framerate: 30}},
-                {name: "Dead", animationParams: {end: 16, framerate: 20}}
+                {name: "Dead", animationParams: {end: 16, framerate: 20}}   
             ],
             controls: controls,
             weapons: weapons,
@@ -82,6 +83,9 @@ class GeneralGameScene extends Phaser.Scene{
         for(let weapon of weapons){
             this.load.image(weapon.name, weapon.spriteDir);
         }
+
+        this.load.image("Cookie", "./assets/Items/Cookie.png");
+        this.load.image("Milk", "./assets/Items/Milk.png");
 
         this.load.image("skeleton", "./assets/Enemy/Skeleton/Sprites/Idle.png");
 
@@ -102,7 +106,7 @@ class GeneralGameScene extends Phaser.Scene{
             maxHealth: 300,
             chaseDistance: 500,
             attackDistance: 100,
-            damage: 5,
+            damage: 20,
             attackDelay: 1000,
             attackRate: 850,
             hitFrame: 6,

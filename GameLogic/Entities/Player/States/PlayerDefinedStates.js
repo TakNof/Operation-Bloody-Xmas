@@ -81,7 +81,7 @@ class PlayerWalkState extends PlayerState{
         }
 
         if(!this.player.getSpriteSounds("Walk").sound.isPlaying && this.player.body.onFloor()){
-            this.player.getSpriteSounds("Walk").playSound(this.player.getPosition());
+            this.player.getSpriteSounds("Walk").playSound();
         }
 
         if(this.player.body.onFloor() && !this.player.isLanding && !this.player.isAttacking){
@@ -465,6 +465,8 @@ class PlayerAttackState extends PlayerState{
                 this.player.getCurrentWeapon().getSpriteSounds("Swing").sound.setDetune(getRndInteger(-4,4)*100);
                 this.player.getCurrentWeapon().getSpriteSounds("Swing").playSound({x: this.player.getCurrentWeapon().hitBox.x, y: this.player.getCurrentWeapon().hitBox.y});
 
+                this.player.getCurrentWeapon().hitBox.body.enable = true;
+
                 this.checkHittingEnemies();
 
                 this.player.off("animationupdate");
@@ -512,6 +514,7 @@ class PlayerAttackState extends PlayerState{
 
                 enemy.getStateMachine().transitionToState("Damaged");
                 enemy.decreaseHealthBy(this.player.getCurrentWeapon().config.damage);
+                this.player.getCurrentWeapon().hitBox.body.enable = false;
             }
         });
     }

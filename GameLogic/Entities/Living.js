@@ -22,6 +22,7 @@ class Living extends Entity{
         this.setBounce(0.1);
         this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
         this.setMaxHealth(config.maxHealth);
+        this.setMaxShield(config.maxShield);
         this.setSpriteAnimations(config.animations);
         this.setSpriteSounds(config.name, config.sounds);
         this.setStateMachine(...config.possibleStates);
@@ -137,21 +138,6 @@ class Living extends Entity{
      */
     getDefaultVelocity(){
         return this.defaultVelocity;
-    }
-
-    /**
-     * Sets the elements to collide with.
-     */
-    setColliderElements(){
-        this.colliderElements = this;
-    }
-
-    /**
-     * Gets the elements to collide with.
-     * @returns {Array}
-     */
-    getColliderElements(){
-        return this.colliderElements;
     }
 
     /**
@@ -271,15 +257,18 @@ class Living extends Entity{
                 this.setHealth(this.getMaxHealth());
             }else{
                 this.setHealth(this.getHealth() + healValue);
-                this.getSpriteSounds("heal").playSound();
-                
-                this.getHUD().setHUDElementValue("health", this.getHealth(), true, "%");
-                this.getHUD().displayHealRedScreen();
+                // this.getSpriteSounds("heal").playSound();
             }
         }
     }
 
     decreaseHealthBy(damageValue){
+        if(this.getShield() && this.getShield() > 0){
+            let shieldDamage = Math.ceil(50*damageValue/this.getShield(), 5)
+            damageValue = Math.ceil(10*damageValue/this.getShield(), 5);
+            this.damageShield(shieldDamage);
+        }
+
         if(this.getHealth() - damageValue <= 0){
             this.setHealth(0);
             this.isAlive = false;
@@ -293,6 +282,63 @@ class Living extends Entity{
         this.scene.time.delayedCall(200, () =>{
             this.clearTint();
         });
+    }
+
+    
+    /**
+     * Sets the max shield of the living sprite.
+     * @param {Number} maxShield
+     */
+    setMaxShield(maxShield){
+        this.maxShield = maxShield;
+        this.setShield(maxShield);
+    }
+
+    /**
+     * Gets the max health of the living sprite.
+     * @returns {Number}
+     */
+    getMaxShield(){
+        return this.maxShield;
+    }
+
+    /**
+     * Sets the current shield of the living sprite.
+     * @param {Number} shield
+     */
+    setShield(shield){
+        this.shield = shield;
+    }
+
+    /**
+     * Gets the current shield of the living sprite.
+     * @return {Number}
+     */
+    getShield(){
+        return this.shield;
+    }
+
+    /**
+     * 
+     * @param {Number} repairShieldValue 
+     */
+    repairShield(repairShieldValue){
+        if(this.getShield() != this.getMaxShield()){
+            if(this.getShield() + repairShieldValue > this.getMaxShield()){
+                this.setShield(this.getMaxShield());
+            }else{
+                this.setShield(this.getShield() + repairShieldValue);
+                // this.getSpriteSounds("heal").playSound();
+            }
+        }
+    }
+
+    damageShield(damageValue){
+        if(this.getShield() - damageValue <= 0){
+            this.setShield(0);
+        }else{
+            this.setShield(this.getShield() - damageValue);
+        }
     }
 
     addDamagedTimeToHistory(){
@@ -323,7 +369,7 @@ class Living extends Entity{
             let recovered = getRndInteger(1, 5) == 1;
     
             if(!this.isStunned){
-                this.isStunned = damageTimeSpan <= 1500 && !recovered;
+                this.isStunned = damageTimeSpan <= 1600 && !recovered;
             }
     
             if(!this.stunnedTimer && this.isStunned && !recovered){
