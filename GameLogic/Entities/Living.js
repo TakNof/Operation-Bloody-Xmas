@@ -502,4 +502,13 @@ class Living extends Entity{
             child.destroy();
         });
     }
+
+    reset(){
+        this.setVisible(true);
+        this.setActive(true);
+        this.isAlive = true;
+        this.setAlpha(1);
+        this.setMaxHealth(this.config.maxHealth);
+        this.getStateMachine().currentState = this.getStateMachine().states.get("Idle");
+    }
 }

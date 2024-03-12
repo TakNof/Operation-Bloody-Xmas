@@ -38,7 +38,7 @@ class Game extends GeneralGameScene{
         this.player.setRaycaster(1);
         // this.player.getStateMachine().printTransitions = true;
 
-        this.skeletons = new EnemyGroup(this, 8, this.walls, this.skeletonConfig);
+        this.skeletons = new EnemyGroup(this, 6, this.walls, this.skeletonConfig);
         // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
@@ -66,15 +66,15 @@ class Game extends GeneralGameScene{
     activateNextRound(){
         if(this.skeletons.getTotalUsed() == 0 && !this.creatingEnemies){
             console.log("Changing round")
+             this.creatingEnemies = true;
             this.currentRound ++;
-            this.createEnemies();
-            
             this.tweens.add({
                 targets: this.roundText,
                 alpha: 0,
                 ease: "Cubic",
                 duration: 2000,
                 onComplete: ()=>{
+                    
                     this.tweens.add({
                         targets: this.roundText,
                         alpha: 1,
@@ -84,37 +84,32 @@ class Game extends GeneralGameScene{
                             this.roundText.text = this.currentRound;
                         }
                     })
+                    this.createEnemies();
                 }
 
-            })
+            });
         }
     }
 
     createEnemies(){
-        this.creatingEnemies = true;
+        let skeleton = this.skeletons.getFirstDead();
+        skeleton.reset();
 
-        this.skeletons.children.iterate((skeleton) =>{
+        let x;
+        let y;
 
-            let x;
-            let y;
+        // do{
+        //     x = getRndInteger(0, this.walls.wallNumberRatio.x);
+        //     y = getRndInteger(0, this.walls.wallNumberRatio.y);
+        // }while(this.walls.wallMatrix[x][y])
+        
+        x = getRndInteger(0, this.walls.wallNumberRatio.x);
+        y = getRndInteger(0, this.walls.wallNumberRatio.y);
 
-            // do{
-            //     x = getRndInteger(0, this.walls.wallNumberRatio.x);
-            //     y = getRndInteger(0, this.walls.wallNumberRatio.y);
-            // }while(this.walls.wallMatrix[x][y])
-            
-            x = getRndInteger(0, this.walls.wallNumberRatio.x);
-            y = getRndInteger(0, this.walls.wallNumberRatio.y);
+        skeleton.x = this.walls.blockSize*(x + 0.5);
+        skeleton.y = this.walls.blockSize*(y + 0.5);
 
-            skeleton.setVisible(true);
-            skeleton.setActive(true);
-            skeleton.x = x;
-            skeleton.y = y;
-            console.log(skeleton.getPosition());
-        })
-      
         this.creatingEnemies = false;
-        console.log(this.skeletons.getTotalUsed())
     }
 
     update(time, delta){

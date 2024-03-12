@@ -588,8 +588,6 @@ class SkeletonDeadState extends EnemyState{
             
         }
 
-        this.enemy.body.enable = false;
-
         setTimeout(() => {
             this.enemy.getScene().tweens.add({
                 targets: this.enemy,

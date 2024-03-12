@@ -500,7 +500,7 @@ class PlayerAttackState extends PlayerState{
         const {scene, config} = this.player;
 
         scene.physics.overlap(this.player.getCurrentWeapon().hitBox, scene.skeletons, (weapon, enemy) =>{
-            if(enemy.getStateMachine().currentState.stateKey != "Damaged"){
+            if(enemy.getStateMachine().currentState.stateKey != "Damaged" && enemy.isAlive){
                 if(!enemy.isStunned){
                     // enemy.lastAttackTimer = enemy.config.attackRate - (enemy.scene.time.now - enemy.lastAttackTimer);
                     // enemy.lastAttackTimer = enemy.scene.time.now;
