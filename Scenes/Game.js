@@ -8,10 +8,20 @@ class Game extends GeneralGameScene{
         // this.game.config.fps = 120;
         this.grid = this.add.grid(0, 0, canvasSize.width*4, canvasSize.height*4, 32, 32, 0x00b9f2).setAltFillStyle(0x016fce).setOutlineStyle();
                 
-        this.walls = new WallsBuilder(this, "wall", 64, 20, true, true);
-        this.walls.createWalls();
+        // this.walls = new WallsBuilder(this, "wall", 64, 20, true, true);
+        // this.walls.createWalls();
         
+        this.map = this.make.tilemap({ key: "map" });
+        this.tiles = this.map.addTilesetImage("tilesetnivel1", "tiles");
 
+        // Crear las capas
+        this.bgLayer = this.map.createLayer("Background", this.tiles, 0, 0);
+        this.mgLayer = this.map.createLayer("Midground", this.tiles, 0, 0);
+        this.fgLayer = this.map.createLayer("Foreground", this.tiles, 0, 0);
+
+        this.collisionLayer = this.mgLayer;
+
+        this.collisionLayer.setCollisionByExclusion([-1]);
 
         this.cookies = this.add.group({
             maxSize: 5,
@@ -38,14 +48,16 @@ class Game extends GeneralGameScene{
         this.player.setRaycaster(1);
         // this.player.getStateMachine().printTransitions = true;
 
-        this.skeletons = new EnemyGroup(this, 6, this.walls, this.skeletonConfig);
+        this.skeletons = new EnemyGroup(this, 6, this.skeletonConfig);
         // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
-        this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
+        // this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         // this.player.getRaycaster().mapGameObjects(this.skeleton, true );
         
-        this.walls.setColliders(this.player, this.skeletons, this.cookies, this.milks);
+        // this.walls.setColliders(this.player, this.skeletons, this.cookies, this.milks);
         // this.walls.setColliders(this.player);
+
+        this.setCollidersWithTilemap(this.player, this.skeletons, this.cookies, this.milks)
 
         this.cameras.main.setBounds(0, 0, canvasSize.width*2, canvasSize.height*2);
         // this.cameras.main.setZoom(0.5, 1);
@@ -110,6 +122,12 @@ class Game extends GeneralGameScene{
         skeleton.y = this.walls.blockSize*(y + 0.5);
 
         this.creatingEnemies = false;
+    }
+
+    setCollidersWithTilemap(){
+        for(let element of arguments){
+            this.physics.add.collider(element, this.collisionLayer);
+        }
     }
 
     update(time, delta){

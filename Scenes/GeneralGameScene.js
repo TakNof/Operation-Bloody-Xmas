@@ -27,7 +27,7 @@ class GeneralGameScene extends Phaser.Scene{
                 position: {x: 40, y: -20},
                 size: {x: 80, y: 150}
             },
-            damage: 80,
+            damage: 50,
             hitFrame: 6,
             sounds: this.loadAudios("pineSword", "./assets/Player/Weapons/Pine Sword/Sounds/", PineSwordSounds),
             spriteDir: "./assets/Player/Weapons/Pine Sword/Sprite/Pine Sword.png"
@@ -127,6 +127,9 @@ class GeneralGameScene extends Phaser.Scene{
             let route = `./assets/Enemy/Skeleton/Animations/${animation.name}/${animation.name}`;
             this.load.atlas(`skeleton_${animation.name}`, `${route}.png`, `${route}.json`);
         }
+
+        this.load.spritesheet("tiles", "./assets/Tileset/tilesetfonseca.png", { frameWidth: 32, frameHeight: 32 });
+          this.load.tilemapTiledJSON("map","assets/Tileset/escenario.json");
     }
 
     /**

@@ -72,6 +72,7 @@ class MainMenu extends Phaser.Scene{
         }); 
                 
         this.mainThemeMusic = this.sound.add("MainMenuTheme");
+        this.mainThemeMusic.setVolume(200);
 
         this.mainThemeMusic.loop = true;
 

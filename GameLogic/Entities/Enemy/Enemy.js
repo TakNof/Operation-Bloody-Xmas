@@ -93,13 +93,11 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
      * @constructor
      * @param {Phaser.Scene} scene2D The scene to place the sprites in the game.
      * @param {Number} amount The amount of enemies to place.
-     * @param {Enemy} enemyObject The enemy object to make the copies of.
+     * @param {Object} config The enemy object to make the copies of.
      */
-    constructor(scene, amount, wallObject, config){
+    constructor(scene, amount, config){
         super(scene.physics.world, scene);
         this.maxSize = amount;
-
-        this.wallObject = wallObject;
 
         let className = this.__checkClassConstructor(config.name.charAt(0).toUpperCase() + config.name.slice(1), "Enemy");
         for(let i = 0; i < amount; i++){
@@ -162,19 +160,37 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
      * @returns {{x: Number, y: Number}}
      */
     setInitialPosition() {
-        let enemyPosition = {x: 0, y: 0, angleOffset: 0};
+        let validEnemyPosition = false;
 
-        let i;
-        let j;
+        // do{
+        //     try{
+        //         let enemyPosition = {x: 0, y: 0};
+        //         // do{
+        //         //     enemyPosition.x = Phaser.Math.Between(0, this.scene.map.widthInPixels);
+        //         //     enemyPosition.y = Phaser.Math.Between(0, this.scene.map.heightInPixels);
+        //         // }while(this.scene.map.getTilAtWorldXY(enemyPosition.x, enemyPosition.y).layer.name == "Foreground");
 
-        do{
-            i = getRndInteger(0, this.wallObject.wallNumberRatio.y);
-            j = getRndInteger(0, this.wallObject.wallNumberRatio.x);
-        }while(this.wallObject.wallMatrix[i][j])
+        //         enemyPosition.x = Phaser.Math.Between(0, this.scene.map.widthInPixels);
+        //         enemyPosition.y = Phaser.Math.Between(0, this.scene.map.heightInPixels);
+        //         console.log(this.scene.map.getTilAtWorldXY(enemyPosition.x, enemyPosition.y).layer.name);
+        //         debugger;
 
-        enemyPosition.x = this.wallObject.blockSize*(j + 0.5);
-        enemyPosition.y = this.wallObject.blockSize*(i + 0.5);
+        //         validEnemyPosition = true;
+        //         return enemyPosition;
 
-        return enemyPosition;
+        //     }catch (error){
+        //         console.log("Tile not valid for positioning")
+                
+        //     }
+        // }while(!validEnemyPosition);
+
+        let enemyPosition = {x: 0, y: 0};
+            enemyPosition.x = Phaser.Math.Between(0, this.scene.map.widthInPixels);
+            enemyPosition.y = Phaser.Math.Between(0, this.scene.map.heightInPixels);
+            console.log(this.scene.map);
+            // debugger;
+
+            validEnemyPosition = true;
+            return enemyPosition;
     }
 }

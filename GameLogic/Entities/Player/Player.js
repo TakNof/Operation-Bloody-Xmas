@@ -197,14 +197,14 @@ class Player extends Living{
             ray.setOrigin(this.getPositionX(), this.getPositionY());
             ray.cast()
         }
-        // this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
+        this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
 
-        // let offsetX = this.body.center.x - this.body.width/2;
-        // let offsetY = this.body.center.y - this.body.height/2;
+        let offsetX = this.body.center.x - this.body.width/2;
+        let offsetY = this.body.center.y - this.body.height/2;
 
-        // this.offsetMarker.setPosition(offsetX, offsetY);
+        this.offsetMarker.setPosition(offsetX, offsetY);
         
-        // this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
+        this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
 
         this.playerText.x = this.x - 60;
         this.playerText.y = this.y - 100;

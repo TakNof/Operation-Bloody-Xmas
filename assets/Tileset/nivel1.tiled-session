@@ -1,0 +1,40 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "escenario.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "escenario.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 1649.3333333333333,
+                "y": 373.33333333333337
+            }
+        },
+        "escenario.tmx#tilesetnivel1": {
+            "scaleInDock": 1
+        },
+        "tilesetnivel1.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "C:/Users/308/Downloads/Operation-Bloody-Xmas/assets/Tileset",
+    "last.imagePath": "C:/Users/skywa/OneDrive/Documentos/EscenarioFonseca",
+    "map.lastUsedExportFilter": "Archivos de mapa JSON (*.json)",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "tilesetnivel1.tsx",
+        "escenario.tmx"
+    ],
+    "project": "nivel1.tiled-project",
+    "recentFiles": [
+        "tilesetnivel1.tsx",
+        "escenario.tmx"
+    ],
+    "tileset.lastUsedFormat": "tsx"
+}
