@@ -114,6 +114,7 @@ class Sprite extends Phaser.Physics.Arcade.Sprite{
     getPosition(){
         return {x: this.x, y: this.y};
     }
+
     /**
      * Sets the visibility of the sprite.
      * @param {boolean} visible Whether the sprite is visible or not.

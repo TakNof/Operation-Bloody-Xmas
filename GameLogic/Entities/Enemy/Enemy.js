@@ -15,6 +15,8 @@ class Enemy extends Living{
     constructor(scene, originInfo, config){
         super(scene, originInfo, config);        
 
+        this.setPositionInFreeSpace();
+
         this.playerInSight = false;
         this.stunned = false;
 
@@ -34,6 +36,16 @@ class Enemy extends Living{
      */
     getDistanceToPlayer(){
         return this.distanceToPlayer;
+    }
+
+    updateRaycaster(){
+        
+        this.getRaycaster().ray.setRay(this.getPositionX(), this.getPositionY(),
+            Phaser.Math.Angle.Between(
+                this.getPositionX(), this.getPositionY(), this.getScene().player.getPositionX(), this.getScene().player.getPositionY()
+            )
+        );
+        this.playerInSight = this.getRaycaster().ray.cast().object.constructor.name == "Player";
     }
 
     /**
@@ -81,8 +93,11 @@ class Enemy extends Living{
     }
 
     update(){
-        this.setDistanceToPlayer();
-        this.getStateMachine().update();
+        if(this.active){
+            this.setDistanceToPlayer();
+            this.getStateMachine().update();
+            this.updateRaycaster();
+        }
         // console.log(this.getStateMachine().getStateHistory());
     }
 }
@@ -93,20 +108,17 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
      * @constructor
      * @param {Phaser.Scene} scene2D The scene to place the sprites in the game.
      * @param {Number} amount The amount of enemies to place.
+     * @param {Number} maxSize The maximum amount of enemies to place.
      * @param {Object} config The enemy object to make the copies of.
      */
-    constructor(scene, amount, config){
+    constructor(scene, amount, maxSize, config){
         super(scene.physics.world, scene);
-        this.maxSize = amount;
+        this.maxSize = maxSize;
 
         let className = this.__checkClassConstructor(config.name.charAt(0).toUpperCase() + config.name.slice(1), "Enemy");
         for(let i = 0; i < amount; i++){
-            this.add(new className(scene, this.setInitialPosition(), config))
+            this.add(new className(scene, {x: 0, y:0}, config))
         }
-
-
-        // this.callAll("setRaycaster", this.wallMatrix, config.angleOffset, 1);
-        // this.callAll("setDebug", game.config.physics.arcade.debug);
 
         scene.physics.add.collider(this, this);
     }
@@ -154,43 +166,4 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
             }
         });
     };
-
-    /**
-     * Sets the position of the enemy acording to the available spaces in the map.
-     * @returns {{x: Number, y: Number}}
-     */
-    setInitialPosition() {
-        let validEnemyPosition = false;
-
-        // do{
-        //     try{
-        //         let enemyPosition = {x: 0, y: 0};
-        //         // do{
-        //         //     enemyPosition.x = Phaser.Math.Between(0, this.scene.map.widthInPixels);
-        //         //     enemyPosition.y = Phaser.Math.Between(0, this.scene.map.heightInPixels);
-        //         // }while(this.scene.map.getTilAtWorldXY(enemyPosition.x, enemyPosition.y).layer.name == "Foreground");
-
-        //         enemyPosition.x = Phaser.Math.Between(0, this.scene.map.widthInPixels);
-        //         enemyPosition.y = Phaser.Math.Between(0, this.scene.map.heightInPixels);
-        //         console.log(this.scene.map.getTilAtWorldXY(enemyPosition.x, enemyPosition.y).layer.name);
-        //         debugger;
-
-        //         validEnemyPosition = true;
-        //         return enemyPosition;
-
-        //     }catch (error){
-        //         console.log("Tile not valid for positioning")
-                
-        //     }
-        // }while(!validEnemyPosition);
-
-        let enemyPosition = {x: 0, y: 0};
-            enemyPosition.x = Phaser.Math.Between(0, this.scene.map.widthInPixels);
-            enemyPosition.y = Phaser.Math.Between(0, this.scene.map.heightInPixels);
-            console.log(this.scene.map);
-            // debugger;
-
-            validEnemyPosition = true;
-            return enemyPosition;
-    }
 }

@@ -21,10 +21,15 @@ class Living extends Entity{
 
         this.setBounce(0.1);
         this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
+        
         this.setMaxHealth(config.maxHealth);
         this.setMaxShield(config.maxShield);
+        
         this.setSpriteAnimations(config.animations);
         this.setSpriteSounds(config.name, config.sounds);
+        
+        this.setRaycaster();
+
         this.setStateMachine(...config.possibleStates);
         
         this.children = [];
@@ -81,6 +86,38 @@ class Living extends Entity{
      */
     getCustomSpriteOrigin(){
         return this.customSpriteOrigin;
+    }
+
+    /**
+     * Sets the position of the living acording to the available spaces in the map.
+     * @returns {{x: Number, y: Number}}
+     */
+    setPositionInFreeSpace() {
+        let validPosition = false;
+        let x;
+        let y;
+
+        do{
+            try{
+                do{
+                    x = Phaser.Math.Between(this.body.width , this.scene.map.widthInPixels  - this.body.width);
+                    y = Phaser.Math.Between(this.body.height, this.scene.map.heightInPixels - this.body.height);
+
+                    // x = x*this.map.tileWidth/this.map.tileWidth
+                    // y = y*this.map.tileWidth/this.map.tileWidth                    
+                    // wallPosition.x = this.blockSize*(j + 0.5);
+                    // wallPosition.y = this.blockSize*(i + 0.5);
+                    
+                }while(!this.scene.bgLayer.getTileAtWorldXY(x, y));
+
+                validPosition = true;
+            }catch (error){
+                console.log(`Tile not found, search was done out of bounds.`);
+                
+            }
+        }while(!validPosition);
+
+        this.setPosition(x, y);
     }
 
     /**
@@ -184,26 +221,27 @@ class Living extends Entity{
     /**
      * This method created the raycaster object of the sprite.
      */
-    setRaycaster(amountOfRays) {
+    setRaycaster() {
         this.raycaster = this.getScene().raycasterPlugin.createRaycaster({
-            debug: {
-              enabled: false, //enable debug mode
-              maps: false, //enable maps debug
-              rays: false, //enable rays debug
-              graphics: {
-                  ray: 0x00ff00, //debug ray color; set false to disable
-                  rayPoint: 0xff00ff, //debug ray point color; set false to disable
-                  mapPoint: 0x00ffff, //debug map point color; set false to disable
-                  mapSegment: 0x0000ff, //debug map segment color; set false to disable
-                  mapBoundingBox: 0xff0000 //debug map bounding box color; set false to disable
-              }
-            }
-          });
-        this.raycaster.rays = new Array(amountOfRays);
-
-        for(let i = 0; i < amountOfRays; i++){
-            this.raycaster.rays[i] = this.raycaster.createRay();
+            debug: true
+        });
+    
+        this.raycaster.ray = this.raycaster.createRay();
+        if(config.chaseDistance){
+            this.raycaster.ray.setDetectionRange(this.config.chaseDistance);
+        }else{
+            this.raycaster.ray.setDetectionRange(300);
         }
+
+        this.raycaster.setBoundingBox(0, 0, this.scene.map.widthInPixels, this.scene.map.heightInPixels);
+
+        this.raycaster.mapGameObjects(this.scene.collisionLayer, false, {
+            collisionTiles: this.scene.collisionLayer.layer.collideIndexes //array of tiles types which can collide with ray
+        });
+
+        this.raycaster.mapGameObjects(this.scene.fgLayer, false, {
+            collisionTiles: this.scene.fgLayer.layer.collideIndexes //array of tiles types which can collide with ray
+        });
     }
 
     /**
@@ -481,7 +519,6 @@ class Living extends Entity{
             if(this.lastPlayedAnimation !== anims.key && anims.key === this.anims.currentAnim.key){
                 this.setOffsetByOrigin(otherWidth, otherHeight);
                 this.lastPlayedAnimation = anims.key;
-                // console.log("Calling setOffsetByOrigin method");
             }
         });
     }
@@ -503,12 +540,28 @@ class Living extends Entity{
         });
     }
 
+    
+    /**
+     * Resets the original state of the sprite object to its initial values.
+     */
     reset(){
+        this.isAlive = true;
+        this.setMaxHealth(this.config.maxHealth);
+        this.getStateMachine().transitionToState("Idle"); 
         this.setVisible(true);
         this.setActive(true);
-        this.isAlive = true;
+        this.setPositionInFreeSpace();
         this.setAlpha(1);
-        this.setMaxHealth(this.config.maxHealth);
-        this.getStateMachine().currentState = this.getStateMachine().states.get("Idle");
+        this.body.setAllowGravity(true);
+    }
+
+    /**
+     * Disables the Living sprite.
+     */
+    disable(){
+        this.setVisible(false);
+        this.setActive(false);
+        this.setPosition(0,0);
+        this.body.setAllowGravity(false);
     }
 }

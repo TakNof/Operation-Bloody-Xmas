@@ -129,7 +129,7 @@ class GeneralGameScene extends Phaser.Scene{
         }
 
         this.load.spritesheet("tiles", "./assets/Tileset/tilesetfonseca.png", { frameWidth: 32, frameHeight: 32 });
-          this.load.tilemapTiledJSON("map","assets/Tileset/escenario.json");
+        this.load.tilemapTiledJSON("map","assets/Tileset/escenario.json");
     }
 
     /**

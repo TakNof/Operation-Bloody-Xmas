@@ -27,7 +27,7 @@ class Player extends Living{
 
         this.playerText = this.scene.add.text(0, 0, `${this.health}`, {
             fontSize: '24px',
-            fill: '#000000'
+            fill: '#ffffff'
         });
 
         this.getScene().input.keyboard.on('keydown', (event) => {
@@ -41,16 +41,23 @@ class Player extends Living{
             }
         }, this.getScene());
 
-        this.getScene().input.keyboard.createCombo('PHASER', { resetOnMatch: true });
+        // this.getScene().input.keyboard.createCombo('PHASER', { resetOnMatch: true });
 
-        this.getScene().input.keyboard.createCombo('TAKNOF', { resetOnMatch: true });
+        // this.getScene().input.keyboard.createCombo('TAKNOF', { resetOnMatch: true });
 
-        this.getScene().input.keyboard.on('keycombomatch', function (event) {
-            console.log("phaser has been written: ");
-            console.log(event);
-        });
+        // this.getScene().input.keyboard.on('keycombomatch', function (event) {
+        //     console.log("phaser has been written: ");
+        //     console.log(event);
+        // });
 
+    }
+
+    flipXCustom(){
+        this.flipX = !this.flipX;
+        if(this.getRaycaster()){
+            this.getRaycaster().ray.setAngle(this.getRaycaster().ray.angle + Math.PI);  
         }
+    }
 
     /**
      * Sets the list of weapons of the player.
@@ -187,34 +194,6 @@ class Player extends Living{
         }
     }
 
-    update(){
-        this.getStateMachine().update();
-        this.getScene().sound.listenerPosition.set(this.getPositionX(), this.getPositionY());
-
-        this.grabItem();
-
-        for(let ray of this.getRaycaster().rays){
-            ray.setOrigin(this.getPositionX(), this.getPositionY());
-            ray.cast()
-        }
-        this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
-
-        let offsetX = this.body.center.x - this.body.width/2;
-        let offsetY = this.body.center.y - this.body.height/2;
-
-        this.offsetMarker.setPosition(offsetX, offsetY);
-        
-        this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
-
-        this.playerText.x = this.x - 60;
-        this.playerText.y = this.y - 100;
-        this.playerText.text = `HP: ${this.getHealth()}, SH: ${this.getShield()}`;
-
-        if(!this.body.onFloor() && this.getStateMachine().currentState.stateKey !== "Fall" && this.getVelocityY() > 500){
-            this.getStateMachine().transitionToState('Fall');
-        }
-    }
-
     grabItem(){
         if(this.scene.cookies.getFirstAlive()){
             this.grabCookies();
@@ -247,4 +226,31 @@ class Player extends Living{
         });
 
     }
+
+    update(){
+        this.getStateMachine().update();
+        this.getScene().sound.listenerPosition.set(this.getPositionX(), this.getPositionY());
+
+        this.grabItem();
+
+        this.getRaycaster().ray.setOrigin(this.getPositionX(), this.getPositionY());
+        this.getRaycaster().ray.cast();
+        
+        this.bodyMarker.setPosition(this.body.center.x, this.body.center.y);
+
+        let offsetX = this.body.center.x - this.body.width/2;
+        let offsetY = this.body.center.y - this.body.height/2;
+
+        this.offsetMarker.setPosition(offsetX, offsetY);
+        
+        this.originMarker.setPosition((this.x-this.width/2) + this.width*this.getCustomSpriteOrigin().x, (this.y-this.height/2) + this.height*this.getCustomSpriteOrigin().y);
+
+        this.playerText.x = this.x - 60;
+        this.playerText.y = this.y - 100;
+        this.playerText.text = `HP: ${this.getHealth()}, SH: ${this.getShield()}`;
+
+        if(this.isAlive && !this.body.onFloor() && this.getStateMachine().currentState.stateKey !== "Fall" && this.getVelocityY() > 500){
+            this.getStateMachine().transitionToState('Fall');
+        }
+    }    
 }

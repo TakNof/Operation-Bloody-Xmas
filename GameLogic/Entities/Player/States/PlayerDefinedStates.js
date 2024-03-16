@@ -95,9 +95,9 @@ class PlayerWalkState extends PlayerState{
         }
                 
         if(left.isDown ^ a.isDown  && !this.player.flipX){
-            this.player.flipX= true;
+            this.player.flipXCustom();
         }else if(right.isDown ^ d.isDown && this.player.flipX){
-            this.player.flipX= false;
+            this.player.flipXCustom();
         }
 
         let sign = this.player.flipX ? -1: 1;
@@ -150,9 +150,9 @@ class PlayerRunState extends PlayerState{
         const {defaultVelocity, velocityMultiplier, slideConfig} = this.player.config;
 
         if(left.isDown ^ a.isDown  && !this.player.flipX){
-            this.player.flipX= true;
+            this.player.flipXCustom();
         }else if(right.isDown ^ d.isDown && this.player.flipX){
-            this.player.flipX= false;
+            this.player.flipXCustom();
         }
 
         let sign = this.player.flipX ? -1: 1;
@@ -465,8 +465,6 @@ class PlayerAttackState extends PlayerState{
                 this.player.getCurrentWeapon().getSpriteSounds("Swing").sound.setDetune(getRndInteger(-4,4)*100);
                 this.player.getCurrentWeapon().getSpriteSounds("Swing").playSound({x: this.player.getCurrentWeapon().hitBox.x, y: this.player.getCurrentWeapon().hitBox.y});
 
-                this.player.getCurrentWeapon().hitBox.body.enable = true;
-
                 this.checkHittingEnemies();
 
                 this.player.off("animationupdate");
@@ -514,7 +512,6 @@ class PlayerAttackState extends PlayerState{
 
                 enemy.getStateMachine().transitionToState("Damaged");
                 enemy.decreaseHealthBy(this.player.getCurrentWeapon().config.damage);
-                this.player.getCurrentWeapon().hitBox.body.enable = false;
             }
         });
     }

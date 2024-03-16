@@ -32,7 +32,9 @@ class SkeletonIdleState extends EnemyState{
         }
     }
 
-    exitState(){}
+    exitState(){
+        this.timeout = undefined;
+    }
 
     getNextState(){
         return this.stateKey;
@@ -92,7 +94,7 @@ class SkeletonPatrolState extends EnemyState{
 
             this.interval = undefined;
             this.timeout = undefined;
-            this.enemy.stateMachine.transitionToState("Idle"); 
+            this.enemy.getStateMachine().transitionToState("Idle"); 
         })
     }
 
@@ -419,9 +421,9 @@ class SkeletonBlockState extends EnemyState{
 
     updateState(){
         if(this.enemy.getStateMachine().getStateHistory()[this.enemy.getStateMachine().getStateHistory().length - 2] === "Run"){
-            this.enemy.stateMachine.transitionToState("Run");
+            this.enemy.getStateMachine().transitionToState("Run");
         }else{
-            this.enemy.stateMachine.transitionToState("Walk");
+            this.enemy.getStateMachine().transitionToState("Walk");
         }
     }
 
@@ -595,9 +597,7 @@ class SkeletonDeadState extends EnemyState{
                 duration: 5000,
                 ease: "Cubic",
                 onComplete: () => {
-                    this.enemy.setPosition(0, 0)
-                    this.enemy.setActive(false);
-                    this.enemy.setVisible(false);
+                    this.enemy.disable();
                 },
             });
         }, 1000);

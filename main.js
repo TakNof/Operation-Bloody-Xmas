@@ -6,7 +6,7 @@ let config = {
         default: "arcade",
         arcade: {
             gravity: { y: 980 },
-            debug: false
+            debug: true
         }
     },
     width: canvasSize.width,
