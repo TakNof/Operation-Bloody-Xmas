@@ -9,14 +9,14 @@ class SkeletonIdleState extends EnemyState{
     }
 
     enterState(){
-        if(getRndInteger(1, 10) == 1){
-            this.soundConfig = `Idle_${getRndInteger(1, 3)}`;
+        if(Phaser.Math.Between(1, 10) == 1){
+            this.soundConfig = `Idle_${Phaser.Math.Between(1, 3)}`;
             if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
                 this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
             }
         }
         
-        this.timeout = this.enemy.getScene().time.delayedCall(getRndInteger(2, 3)*1000, () =>{
+        this.timeout = this.enemy.getScene().time.delayedCall(Phaser.Math.Between(2, 3)*1000, () =>{
             this.enemy.getStateMachine().transitionToState("Patrol");
         });
     }
@@ -25,7 +25,7 @@ class SkeletonIdleState extends EnemyState{
         this.enemy.setVelocityX(0);
         this.enemy.play(this.enemy.getSpriteAnimations("Idle"), true);
         
-        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && this.enemy.getScene().player.isAlive){
+        if(this.enemy.playerInSight && this.enemy.getScene().player.isAlive){
             this.timeout.destroy();
             this.enemy.getStateMachine().transitionToState("Chase");
             this.enemy.displayIndicativeTextTween("!!!", 3000);
@@ -72,13 +72,13 @@ class SkeletonPatrolState extends EnemyState{
     enterState(){
         const {defaultVelocity} = this.enemy.config;
 
-        this.soundConfig = `Walk_${getRndInteger(1, 4)}`;
+        this.soundConfig = `Walk_${Phaser.Math.Between(1, 4)}`;
         this.enemy.flipX = !this.enemy.flipX;
         let sign = this.enemy.flipX ? -1: 1;
         this.enemy.setVelocityX(sign*defaultVelocity);
 
         this.interval = this.enemy.getScene().time.addEvent({
-            delay: getRndInteger(1, 3)*1000,
+            delay: Phaser.Math.Between(1, 3)*1000,
             callback: ()=>{
                 this.enemy.flipX = !this.enemy.flipX;
                 let sign = this.enemy.flipX ? -1: 1;
@@ -88,7 +88,7 @@ class SkeletonPatrolState extends EnemyState{
             loop: true
         });
 
-        this.timeout = this.enemy.getScene().time.delayedCall(getRndInteger(4, 6)*1000, ()=>{
+        this.timeout = this.enemy.getScene().time.delayedCall(Phaser.Math.Between(4, 6)*1000, ()=>{
             this.interval.remove();
             this.timeout.destroy();
 
@@ -106,7 +106,7 @@ class SkeletonPatrolState extends EnemyState{
             this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
         }
 
-        if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance && player.isAlive){
+        if(this.enemy.playerInSight && player.isAlive){
             this.interval.remove();
             this.timeout.destroy();
 
@@ -153,7 +153,7 @@ class SkeletonChaseState extends EnemyState{
     }
 
     enterState(){
-        this.soundConfig = `Walk_${getRndInteger(1, 4)}`;
+        this.soundConfig = `Walk_${Phaser.Math.Between(1, 4)}`;
     }
 
     updateState(){
@@ -163,7 +163,7 @@ class SkeletonChaseState extends EnemyState{
         this.enemy.onWallFound();
         if(this.enemy.getDistanceToPlayer() <= this.enemy.config.attackDistance && player.isAlive){
             this.enemy.getStateMachine().transitionToState("Attack");
-        }else if(this.enemy.getDistanceToPlayer() >= this.enemy.config.chaseDistance && player.isAlive){
+        }else if(!this.enemy.playerInSight && player.isAlive){
             this.enemy.lastPlayerSeenPosition = player.getPosition();
             this.enemy.getStateMachine().transitionToState("Search");
         }else{
@@ -215,8 +215,8 @@ class SkeletonSearchState extends EnemyState{
     }
 
     enterState(){
-        this.soundConfig1 = `Idle_${getRndInteger(1, 3)}`;
-        this.soundConfig2 = `Walk_${getRndInteger(1, 4)}`;
+        this.soundConfig1 = `Idle_${Phaser.Math.Between(1, 3)}`;
+        this.soundConfig2 = `Walk_${Phaser.Math.Between(1, 4)}`;
         this.reachedPlayerLastSeenPosition = false;
     }
 
@@ -225,19 +225,19 @@ class SkeletonSearchState extends EnemyState{
 
         const {defaultVelocity} = this.enemy.config;
         
-        if(Math.abs(this.enemy.lastPlayerSeenPosition.x - this.enemy.getPositionX()) <= 10 && this.enemy.getDistanceToPlayer() > this.enemy.config.chaseDistance){
+        if(Math.abs(this.enemy.lastPlayerSeenPosition.x - this.enemy.getPositionX()) <= 10 && !this.enemy.playerInSight){
             this.reachedPlayerLastSeenPosition = true;
             
             this.enemy.setVelocityX(0);
             this.enemy.play(this.enemy.getSpriteAnimations("Idle"), true);
             
             if(!this.interval || this.interval.paused){
-                let searchStateTime = getRndInteger(4, 6)*1000;
+                let searchStateTime = Phaser.Math.Between(4, 6)*1000;
 
                 this.enemy.displayIndicativeTextTween("???", searchStateTime);
 
                 this.interval = this.enemy.getScene().time.addEvent({
-                    delay: getRndInteger(1, 3)*1000,
+                    delay: Phaser.Math.Between(1, 3)*1000,
                     callback: ()=>{
                         this.enemy.flipX = !this.enemy.flipX;
                         this.enemy.getSpriteSounds(this.soundConfig1).playSound(this.enemy.getPosition());
@@ -258,7 +258,7 @@ class SkeletonSearchState extends EnemyState{
                 })
             }
 
-        }else if(this.enemy.getDistanceToPlayer() <= this.enemy.config.chaseDistance){
+        }else if(this.enemy.playerInSight){
             if(this.interval){
                 this.interval.remove();
                 this.timeout.destroy();
@@ -318,7 +318,7 @@ class SkeletonAttackState extends EnemyState{
     }
 
     enterState(){
-        this.soundConfig1 = `Idle_${getRndInteger(1, 3)}`;
+        this.soundConfig1 = `Idle_${Phaser.Math.Between(1, 3)}`;
         this.idleAnim = true;
     }
 
@@ -341,7 +341,7 @@ class SkeletonAttackState extends EnemyState{
                 this.enemy.getStateMachine().transitionToState("Chase"); 
             }else if(scene.time.now  - this.enemy.lastAttackTimer >= config.attackRate) {
                 swordHitBox.body.enable = true;
-                this.soundConfig2 = `Attack_${getRndInteger(1, 5)}`;
+                this.soundConfig2 = `Attack_${Phaser.Math.Between(1, 5)}`;
                 this.enemy.play(this.enemy.getSpriteAnimations("Attack"));
 
                 this.idleAnim =  false;
@@ -463,7 +463,7 @@ class SkeletonDamagedState extends EnemyState{
     }
 
     enterState(){
-        this.soundConfig = `Damaged_${getRndInteger(1, 4)}`;
+        this.soundConfig = `Damaged_${Phaser.Math.Between(1, 4)}`;
         this.enemy.play(this.enemy.getSpriteAnimations("Damaged"), true);
         if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying){
             this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
@@ -570,8 +570,8 @@ class SkeletonDeadState extends EnemyState{
             this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
         }
 
-        if(getRndInteger(1, 2) == 1){
-            let itemIsMilk = getRndInteger(1, 3) < 2;
+        if(Phaser.Math.Between(1, 2) == 1){
+            let itemIsMilk = Phaser.Math.Between(1, 3) < 2;
 
             let item;
             if(itemIsMilk){

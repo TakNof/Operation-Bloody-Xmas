@@ -9,10 +9,6 @@ class Weapon extends Entity{
     constructor(scene, originInfo, config){
         super(scene, originInfo, config.name);
 
-        if(this.originInfo.angleOffset){
-            this.rotation = adjustAngleValue(this.originInfo.angleOffset);
-        }
-
         this.config = config;
 
         this.setSpriteSounds(config.name, config.sounds);

@@ -128,8 +128,8 @@ class GeneralGameScene extends Phaser.Scene{
             this.load.atlas(`skeleton_${animation.name}`, `${route}.png`, `${route}.json`);
         }
 
-        this.load.spritesheet("tiles", "./assets/Tileset/tilesetfonseca.png", { frameWidth: 32, frameHeight: 32 });
-        this.load.tilemapTiledJSON("map","assets/Tileset/escenario.json");
+        this.load.spritesheet("tiles", "./assets/Tileset/New/Level1.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.tilemapTiledJSON("map","./assets/Tileset/New/Level1.json");
     }
 
     /**

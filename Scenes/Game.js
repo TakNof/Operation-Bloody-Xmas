@@ -8,15 +8,33 @@ class Game extends GeneralGameScene{
         this.game.config.fps = 120;
                         
         this.map = this.make.tilemap({ key: "map" });
-        this.tiles = this.map.addTilesetImage("tilesetnivel1", "tiles");
+        this.tiles = this.map.addTilesetImage("Level1.png", "tiles");
 
         this.bgLayer = this.map.createLayer("Background", this.tiles, 0, 0);
         this.mgLayer = this.map.createLayer("Midground", this.tiles, 0, 0);
-        this.fgLayer = this.map.createLayer("Foreground", this.tiles, 0, 0);
 
         this.collisionLayer = this.mgLayer;
 
         this.collisionLayer.setCollisionByExclusion([-1]);
+
+        let pathFinding = new EasyStar.js();
+
+        let grid = [];
+        for (let y = 0; y < this.map.height; y++) {
+            let col = [];
+            for (let x = 0; x < this.map.width; x++) {
+                if(this.bgLayer.getTileAt(x, y)){
+                    col.push(0);
+                }else{
+                    col.push(1);
+                }
+            }
+            grid.push(col);
+        }
+
+        pathFinding.setGrid(grid);
+
+        pathFinding.setAcceptableTiles([0]);
 
         this.cookies = this.add.group({
             maxSize: 5,
@@ -44,7 +62,7 @@ class Game extends GeneralGameScene{
         // this.player.setScale(0.5);
         // this.player.getStateMachine().printTransitions = true;
 
-        this.skeletons = new EnemyGroup(this, 1, 10,  this.skeletonConfig);
+        this.skeletons = new EnemyGroup(this, 10, 10,  this.skeletonConfig);
         // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         // this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());

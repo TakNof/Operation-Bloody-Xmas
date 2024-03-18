@@ -27,7 +27,12 @@ class Enemy extends Living{
      * Sets the distance between the player and the enemy using the player's position. 
      */
     setDistanceToPlayer(){
-        this.distanceToPlayer = hypoCalc(this.getPositionX(), this.getScene().player.getPositionX(), this.getPositionY(), this.getScene().player.getPositionY());
+        this.distanceToPlayer = Phaser.Math.Distance.Between(
+            this.getPositionX(),
+            this.getPositionY(),
+            this.getScene().player.getPositionX(),
+            this.getScene().player.getPositionY()
+          );            
     }
     
     /**
@@ -39,13 +44,19 @@ class Enemy extends Living{
     }
 
     updateRaycaster(){
-        
+        this.getRaycaster().ray.setOrigin(this.getPositionX(), this.getPositionY());
+        this.getRaycaster().ray.setAngle(
+            Phaser.Math.Angle.Between(
+                this.getPositionX(), this.getPositionY(), this.getScene().player.getPositionX(), this.getScene().player.getPositionY()
+            )
+        );
         this.getRaycaster().ray.setRay(this.getPositionX(), this.getPositionY(),
             Phaser.Math.Angle.Between(
                 this.getPositionX(), this.getPositionY(), this.getScene().player.getPositionX(), this.getScene().player.getPositionY()
             )
         );
-        this.playerInSight = this.getRaycaster().ray.cast().object.constructor.name == "Player";
+    
+        this.playerInSight = this.getRaycaster().ray.cast().object == this.getScene().player && this.getDistanceToPlayer() <= this.config.chaseDistance; 
     }
 
     /**
@@ -141,16 +152,7 @@ class EnemyGroup extends Phaser.Physics.Arcade.Group{
         } else {
             throw new Error(`The class "${className}" isn't defined or itn't an instanse of "${classParent}".`);
         }
-    }
-
-    callAllSoundPanning(player) {
-        this.getChildren().forEach(function (enemy) {
-            for(let sound in enemy.getSpriteSounds()){
-                enemy.getSpriteSounds(sound).setSoundPanning(enemy.getDistanceToPlayer(), player.angleToElement(enemy.getPosition()), player.getAngleRadians());
-            }              
-        });
-    };
-    
+    }    
 
     /**
      * Custom method to call the same method to all children in the group.

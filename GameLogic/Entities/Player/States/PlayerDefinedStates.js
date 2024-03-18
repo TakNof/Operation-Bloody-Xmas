@@ -462,7 +462,7 @@ class PlayerAttackState extends PlayerState{
         
         this.player.on(`animationupdate`, (anim, frame) =>{
             if(frame.index == this.player.getCurrentWeapon().config.hitFrame && anim.key === this.player.getSpriteAnimations("Attack")){
-                this.player.getCurrentWeapon().getSpriteSounds("Swing").sound.setDetune(getRndInteger(-4,4)*100);
+                this.player.getCurrentWeapon().getSpriteSounds("Swing").sound.setDetune(Phaser.Math.Between(-4,4)*100);
                 this.player.getCurrentWeapon().getSpriteSounds("Swing").playSound({x: this.player.getCurrentWeapon().hitBox.x, y: this.player.getCurrentWeapon().hitBox.y});
 
                 this.checkHittingEnemies();
@@ -505,9 +505,9 @@ class PlayerAttackState extends PlayerState{
                 }
     
                 // console.log(enemy.config.attackRate - (enemy.scene.time.now - enemy.lastAttackTimer));
-                let hitSound = `Hit_${getRndInteger(1,3)}`;
+                let hitSound = `Hit_${Phaser.Math.Between(1,3)}`;
     
-                this.player.getCurrentWeapon().getSpriteSounds(hitSound).sound.setDetune(getRndInteger(-4,4)*100);
+                this.player.getCurrentWeapon().getSpriteSounds(hitSound).sound.setDetune(Phaser.Math.Between(-4,4)*100);
                 this.player.getCurrentWeapon().getSpriteSounds(hitSound).playSound(enemy.getPosition());
 
                 enemy.getStateMachine().transitionToState("Damaged");

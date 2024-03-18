@@ -55,7 +55,7 @@ class Player extends Living{
     flipXCustom(){
         this.flipX = !this.flipX;
         if(this.getRaycaster()){
-            this.getRaycaster().ray.setAngle(this.getRaycaster().ray.angle + Math.PI);  
+            this.getRaycaster().ray.setAngle(this.getRaycaster().ray.angle + Math.PI); 
         }
     }
 

@@ -108,7 +108,7 @@ class Living extends Entity{
                     // wallPosition.x = this.blockSize*(j + 0.5);
                     // wallPosition.y = this.blockSize*(i + 0.5);
                     
-                }while(!this.scene.bgLayer.getTileAtWorldXY(x, y));
+                }while(this.scene.collisionLayer.getTileAtWorldXY(x, y));
 
                 validPosition = true;
             }catch (error){
@@ -223,24 +223,15 @@ class Living extends Entity{
      */
     setRaycaster() {
         this.raycaster = this.getScene().raycasterPlugin.createRaycaster({
-            debug: true
+            debug: false
         });
     
         this.raycaster.ray = this.raycaster.createRay();
-        if(config.chaseDistance){
-            this.raycaster.ray.setDetectionRange(this.config.chaseDistance);
-        }else{
-            this.raycaster.ray.setDetectionRange(300);
-        }
-
+              
         this.raycaster.setBoundingBox(0, 0, this.scene.map.widthInPixels, this.scene.map.heightInPixels);
 
         this.raycaster.mapGameObjects(this.scene.collisionLayer, false, {
             collisionTiles: this.scene.collisionLayer.layer.collideIndexes //array of tiles types which can collide with ray
-        });
-
-        this.raycaster.mapGameObjects(this.scene.fgLayer, false, {
-            collisionTiles: this.scene.fgLayer.layer.collideIndexes //array of tiles types which can collide with ray
         });
     }
 
@@ -366,7 +357,6 @@ class Living extends Entity{
                 this.setShield(this.getMaxShield());
             }else{
                 this.setShield(this.getShield() + repairShieldValue);
-                // this.getSpriteSounds("heal").playSound();
             }
         }
     }
@@ -404,7 +394,7 @@ class Living extends Entity{
                 damageTimeSpan = this.getDamagedTimeHistory()[i] - damageTimeSpan;
             }
     
-            let recovered = getRndInteger(1, 5) == 1;
+            let recovered = Phaser.Math.Between(1, 5) == 1;
     
             if(!this.isStunned){
                 this.isStunned = damageTimeSpan <= 1600 && !recovered;
@@ -415,7 +405,7 @@ class Living extends Entity{
     
                 this.displayIndicativeTextTween("Stunned!");
     
-                let stunDuration = getRndInteger(1, 5)*1000;
+                let stunDuration = Phaser.Math.Between(1, 5)*1000;
     
                 this.tintInterval = this.getScene().tweens.add({
                     targets: this,
