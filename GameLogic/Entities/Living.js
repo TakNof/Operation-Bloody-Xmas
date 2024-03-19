@@ -100,7 +100,7 @@ class Living extends Entity{
         do{
             try{
                 do{
-                    x = Phaser.Math.Between(this.body.width , this.scene.map.widthInPixels  - this.body.width);
+                    x = Phaser.Math.Between(this.body.width , this.scene.map.widthInPixels - this.body.width);
                     y = Phaser.Math.Between(this.body.height, this.scene.map.heightInPixels - this.body.height);
 
                     // x = x*this.map.tileWidth/this.map.tileWidth

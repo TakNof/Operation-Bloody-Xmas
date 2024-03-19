@@ -28,7 +28,7 @@ class SkeletonIdleState extends EnemyState{
         if(this.enemy.playerInSight && this.enemy.getScene().player.isAlive){
             this.timeout.destroy();
             this.enemy.getStateMachine().transitionToState("Chase");
-            this.enemy.displayIndicativeTextTween("!!!", 3000);
+
         }
     }
 
@@ -100,7 +100,7 @@ class SkeletonPatrolState extends EnemyState{
 
     updateState(){
         const {player} = this.enemy.scene
-        this.enemy.onWallFound();
+        
         this.enemy.play(this.enemy.getSpriteAnimations("Walk"), true);
         if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying && this.enemy.body.onFloor()){
             this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
@@ -113,7 +113,7 @@ class SkeletonPatrolState extends EnemyState{
             this.interval = undefined;
             this.timeout = undefined;
             this.enemy.getStateMachine().transitionToState("Chase");
-            this.enemy.displayIndicativeTextTween("!!!", 3000);
+
         }
     }
 
@@ -154,32 +154,34 @@ class SkeletonChaseState extends EnemyState{
 
     enterState(){
         this.soundConfig = `Walk_${Phaser.Math.Between(1, 4)}`;
+        if(this.enemy.body.onFloor()){
+            this.enemy.getPathFinder().setPath();
+        }
+        this.enemy.displayIndicativeTextTween("!!!", 3000);
+        this.enemy.getPathFinder().targetLastSeenPosition = undefined;
+        this.enemy.getPathFinder().getPathCallInterval().paused = false;
     }
 
     updateState(){
         const {player} = this.enemy.getScene();
-        const {defaultVelocity} = this.enemy.config;
 
-        this.enemy.onWallFound();
         if(this.enemy.getDistanceToPlayer() <= this.enemy.config.attackDistance && player.isAlive){
             this.enemy.getStateMachine().transitionToState("Attack");
         }else if(!this.enemy.playerInSight && player.isAlive){
-            this.enemy.lastPlayerSeenPosition = player.getPosition();
+            this.enemy.getPathFinder().targetLastSeenPosition = player.getPosition();
             this.enemy.getStateMachine().transitionToState("Search");
-        }else{
+        }else if(this.enemy.getPathFinder().path){
             this.enemy.play(this.enemy.getSpriteAnimations("Walk"), true);
             if(!this.enemy.getSpriteSounds(this.soundConfig).sound.isPlaying && this.enemy.body.onFloor()){
                 this.enemy.getSpriteSounds(this.soundConfig).playSound(this.enemy.getPosition());
             }
-
-            this.enemy.flipX = player.getPositionX() - this.enemy.getPositionX() <= 0.1;
-            let sign = this.enemy.flipX ? -1: 1;
-
-            this.enemy.setVelocityX(sign*defaultVelocity);
+            this.enemy.moveToPoint();
         }
     }
 
-    exitState(){}
+    exitState(){
+        this.enemy.getPathFinder().getPathCallInterval().paused = true;
+    }
 
     getNextState(){
         return this.stateKey;
@@ -217,15 +219,12 @@ class SkeletonSearchState extends EnemyState{
     enterState(){
         this.soundConfig1 = `Idle_${Phaser.Math.Between(1, 3)}`;
         this.soundConfig2 = `Walk_${Phaser.Math.Between(1, 4)}`;
+        
         this.reachedPlayerLastSeenPosition = false;
     }
 
     updateState(){
-        this.enemy.onWallFound();
-
-        const {defaultVelocity} = this.enemy.config;
-        
-        if(Math.abs(this.enemy.lastPlayerSeenPosition.x - this.enemy.getPositionX()) <= 10 && !this.enemy.playerInSight){
+        if(Phaser.Math.Distance.BetweenPoints(this.enemy.getPosition(), this.enemy.getPathFinder().target) <= 10 && !this.enemy.playerInSight || this.enemy.getPathFinder().unableToReachTarget){
             this.reachedPlayerLastSeenPosition = true;
             
             this.enemy.setVelocityX(0);
@@ -253,6 +252,7 @@ class SkeletonSearchState extends EnemyState{
                     this.interval = undefined;
                     this.timeout = undefined;
 
+                    this.enemy.getPathFinder().cleanPathMarkers();
                     this.enemy.getStateMachine().transitionToState("Patrol");
                     this.enemy.lastAttackTimer = this.enemy.scene.time.now + this.enemy.config.attackDelay;
                 })
@@ -268,21 +268,19 @@ class SkeletonSearchState extends EnemyState{
             }
             
             this.enemy.getStateMachine().transitionToState("Chase");
-            this.enemy.displayIndicativeTextTween("!!!", 3000);            
+            
 
-        }else if(!this.reachedPlayerLastSeenPosition){
+        }else if(!this.reachedPlayerLastSeenPosition && this.enemy.getPathFinder().path){
             this.enemy.play(this.enemy.getSpriteAnimations("Walk"), true);
             if(!this.enemy.getSpriteSounds(this.soundConfig2).sound.isPlaying && this.enemy.body.onFloor()){
                 this.enemy.getSpriteSounds(this.soundConfig2).playSound(this.enemy.getPosition());
             }
-            this.enemy.flipX = this.enemy.lastPlayerSeenPosition.x < this.enemy.getPositionX();
-            let sign = this.enemy.flipX ? -1: 1;
-
-            this.enemy.setVelocityX(sign*defaultVelocity);
+            this.enemy.moveToPoint();
         }
     }
 
-    exitState(){}
+    exitState(){
+    }
 
     getNextState(){
         return this.stateKey;
@@ -318,6 +316,7 @@ class SkeletonAttackState extends EnemyState{
     }
 
     enterState(){
+        this.enemy.getPathFinder().clearPath();
         this.soundConfig1 = `Idle_${Phaser.Math.Between(1, 3)}`;
         this.idleAnim = true;
     }
@@ -598,6 +597,8 @@ class SkeletonDeadState extends EnemyState{
                 ease: "Cubic",
                 onComplete: () => {
                     this.enemy.disable();
+                    this.enemy.getPathFinder().cleanPathMarkers();
+                    this.enemy.getPathFinder().clearPath();
                 },
             });
         }, 1000);

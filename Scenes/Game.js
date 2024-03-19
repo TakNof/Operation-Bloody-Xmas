@@ -17,24 +17,25 @@ class Game extends GeneralGameScene{
 
         this.collisionLayer.setCollisionByExclusion([-1]);
 
-        let pathFinding = new EasyStar.js();
-
-        let grid = [];
+        this.pathFindingGrid = [];
         for (let y = 0; y < this.map.height; y++) {
             let col = [];
             for (let x = 0; x < this.map.width; x++) {
-                if(this.bgLayer.getTileAt(x, y)){
+                if(!this.collisionLayer.getTileAt(x, y) && this.collisionLayer.getTileAt(x, y+1)){
                     col.push(0);
+                }else if(this.collisionLayer.getTileAt(x, y)){
+                    col.push(10);
                 }else{
-                    col.push(1);
+                    col.push(2);
                 }
+
+                this.add.text(x*64 + 32, y*64 + 32, `${col[x]}`, {
+                    fontSize: '24px',
+                    fill: '#ffffff'
+                });
             }
-            grid.push(col);
+            this.pathFindingGrid.push(col);
         }
-
-        pathFinding.setGrid(grid);
-
-        pathFinding.setAcceptableTiles([0]);
 
         this.cookies = this.add.group({
             maxSize: 5,
@@ -57,24 +58,25 @@ class Game extends GeneralGameScene{
         }
 
         // this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.46}, this.playerConfig);
-        this.player = new Player(this, {x: 0, y: 0}, this.playerConfig);
-        this.player.setPositionInFreeSpace();
+        this.player = new Player(this, {x: 700, y: 1000}, this.playerConfig);
+        // this.player.setPositionInFreeSpace();
         // this.player.setScale(0.5);
         // this.player.getStateMachine().printTransitions = true;
 
-        this.skeletons = new EnemyGroup(this, 10, 10,  this.skeletonConfig);
-        // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
+        this.skeletons = new EnemyGroup(this, 1, 10,  this.skeletonConfig);
+        this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         // this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         this.player.getRaycaster().mapGameObjects(this.skeletons.getChildren(), true );
         this.skeletons.children.iterate((skeleton) =>{
             skeleton.getRaycaster().mapGameObjects(this.player, true);
+            skeleton.setPosition(300, 1000)
         })
-        
-        this.setCollidersWithTilemap(this.player, this.skeletons, this.cookies, this.milks)
+
+        this.setCollidersWithTilemap(this.player, this.skeletons, this.cookies, this.milks);
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        // this.cameras.main.setZoom(0.5, 1);
+        // this.cameras.main.setZoom(0.5, 1);  
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         this.cameras.main.setScroll(0, 0);
        
@@ -87,6 +89,7 @@ class Game extends GeneralGameScene{
 
         this.roundText = this.add.text(10, 10, this.currentRound, { fontSize: '128px', fill: '#eb584d' });
         this.roundText.setScrollFactor(0);
+
     }
 
     activateNextRound(){

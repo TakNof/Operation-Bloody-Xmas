@@ -12,12 +12,6 @@ class Skeleton extends Enemy{
         this.createSwordHitBox(config.swordHitBoxInfo.x, config.swordHitBoxInfo.y, config.swordHitBoxInfo.width, config.swordHitBoxInfo.height);
     }
 
-    onWallFound(){
-        if(this.body.onWall() && this.body.onFloor()){
-            this.setVelocityY(-400);
-        } 
-    }
-
     createSwordHitBox(x, y, width, height){
         this.swordHitBox = this.getScene().add.rectangle(x, y, width, height, 0xffffff, 0);
         this.getScene().physics.add.existing(this.swordHitBox, false);
@@ -26,5 +20,46 @@ class Skeleton extends Enemy{
         this.swordHitBox.body.enable = false;
         
         this.addChild(this.swordHitBox);
+    }
+
+    jump(){
+        if(this.body.onFloor()){
+            this.setVelocityY(this.config.jumpVelocity);
+        }
+    }
+
+    moveToPoint(){
+        if(this.getPathFinder().path.length == 0){
+            this.getPathFinder().clearPath();
+            // console.log("Deleting path");
+            return;
+        }
+
+        let target = this.getPathFinder().path[1] ? this.getPathFinder().path[1] : this.getPathFinder().path[0];
+        let dx = target.x*64 + 32 - this.x;
+        let dy = target.y*64 + 32 - this.y;
+
+        if(Math.abs(dx) < 1 && Math.abs(dy) < this.body.height/2){
+            this.getPathFinder().markers[0].destroy();
+            this.getPathFinder().markers.shift();
+            this.getPathFinder().path.shift();
+            // console.log("Deleting step");
+            return;
+        }
+
+        this.flipX = dx <= 1;
+        let sign = this.flipX ? -1: 1;
+
+        if(Math.abs(dx) >= 1){
+            this.setVelocityX(sign*this.config.defaultVelocity);
+            // console.log("moving in x direction") 
+        }else{
+            this.setVelocityX(0);
+        }
+        
+
+        if(Math.abs(dy) >= this.body.height){
+            this.jump();
+        }
     }
 }

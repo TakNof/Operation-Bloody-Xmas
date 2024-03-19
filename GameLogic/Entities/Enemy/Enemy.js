@@ -17,6 +17,8 @@ class Enemy extends Living{
 
         this.setPositionInFreeSpace();
 
+        this.setPathFinder();
+
         this.playerInSight = false;
         this.stunned = false;
 
@@ -32,7 +34,7 @@ class Enemy extends Living{
             this.getPositionY(),
             this.getScene().player.getPositionX(),
             this.getScene().player.getPositionY()
-          );            
+        );            
     }
     
     /**
@@ -42,14 +44,16 @@ class Enemy extends Living{
     getDistanceToPlayer(){
         return this.distanceToPlayer;
     }
+    
+    setPathFinder(){
+        this.pathFinder = new PathFinder(this.getScene(), this);
+    }
+
+    getPathFinder(){
+        return this.pathFinder;
+    }
 
     updateRaycaster(){
-        this.getRaycaster().ray.setOrigin(this.getPositionX(), this.getPositionY());
-        this.getRaycaster().ray.setAngle(
-            Phaser.Math.Angle.Between(
-                this.getPositionX(), this.getPositionY(), this.getScene().player.getPositionX(), this.getScene().player.getPositionY()
-            )
-        );
         this.getRaycaster().ray.setRay(this.getPositionX(), this.getPositionY(),
             Phaser.Math.Angle.Between(
                 this.getPositionX(), this.getPositionY(), this.getScene().player.getPositionX(), this.getScene().player.getPositionY()
