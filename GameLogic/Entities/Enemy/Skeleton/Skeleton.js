@@ -40,9 +40,12 @@ class Skeleton extends Enemy{
         let dy = target.y*64 + 32 - this.y;
 
         if(Math.abs(dx) < 1 && Math.abs(dy) < this.body.height/2){
-            this.getPathFinder().markers[0].destroy();
-            this.getPathFinder().markers.shift();
+            if(this.getPathFinder().markers.length > 0){
+                this.getPathFinder().markers[0].destroy();
+                this.getPathFinder().markers.shift();
+            }
             this.getPathFinder().path.shift();
+            this.getPathFinder().resetUnreachablePathTimer();
             // console.log("Deleting step");
             return;
         }
@@ -57,9 +60,16 @@ class Skeleton extends Enemy{
             this.setVelocityX(0);
         }
         
-
-        if(Math.abs(dy) >= this.body.height){
+        
+        let currentTile = this.scene.pathFindingGrid[Math.floor(this.getPositionY()/64)][Math.floor(this.getPositionX()/64)];
+        
+        if(currentTile == 1 && (this.flipX ? this.getPositionX() % 64 < 10 : this.getPositionX() % 64 > 54) || Math.abs(dy) >= this.body.height){
             this.jump();
         }
+    }
+
+    isPointAhead(point){
+        let dx = point.x*64 + 32 - this.x;
+        return (dx > 0 && !this.flipX) || (dx < 0 && this.flipX);
     }
 }

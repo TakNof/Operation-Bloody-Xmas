@@ -23,6 +23,11 @@ class Enemy extends Living{
         this.stunned = false;
 
         this.lastAttackTimer = config.attackDelay;
+        this.showInfo = true;
+
+        if(this.showInfo){
+            this.setInfoTexts();
+        }
     }
 
     /**
@@ -63,47 +68,21 @@ class Enemy extends Living{
         this.playerInSight = this.getRaycaster().ray.cast().object == this.getScene().player && this.getDistanceToPlayer() <= this.config.chaseDistance; 
     }
 
-    /**
-     * This method allows the enemy to have the basic controls of movement according to the stablished parameters.
-     */
-    move(playerPosition){
-        if(this.active){
-            this.setVelocity(0);
-            this.setRayData();
-    
-            if(this.getDebug() === true){
-                this.getSpriteRays().setVelocity(0);
-                this.getSpriteRays().redrawRay2D(this.getPosition(), this.getRayData());
-            }   
-    
-            this.getRaycaster().setSpritePosition(this.getPosition());
-            
-            this.getRaycaster().setRayAngle(adjustAngleValue(this.angleToElement(playerPosition)));
-            this.setDistanceToPlayer(playerPosition);
-    
-            //We want the enemy to follow us if we are in range of sight and if the distance with the player is less than the distance
-            //with the wall.
-            if (this.getDistanceToPlayer() <= this.chaseDistance && this.getDistanceToPlayer() > 200 && (this.getDistanceToPlayer() < this.getRayData().distance[0] || this.getRayData().distance[0] == undefined)) {           
-                this.setXcomponent(this.getOriginInfo().angleOffset);
-                this.setYcomponent(this.getOriginInfo().angleOffset);
-    
-                this.setVelocityX(this.getXcomponent());
-                this.setVelocityY(this.getYcomponent());
-    
-                if(this.getDebug() === true){
-                    for(let ray of this.getSpriteRays().rays){
-                        ray.body.setVelocityX(this.getVelocityX());
-                        ray.body.setVelocityY(this.getVelocityY());
-                    }
-                }
-            }
-    
-            if(this.getDistanceToPlayer() <= this.getChaseDistance() && this.getDistanceToPlayer() < this.getRayData().distance[0] || this.getRayData().distance[0] == undefined){
-                this.inSight = true;
-                this.setRotation(adjustAngleValue(this.angleToElement(playerPosition) - this.getOriginInfo().angleOffset));
-            }else{
-                this.inSight = false;
-            } 
+    setInfoTexts(){
+        this.infoToShow = [`State: ${this.getStateMachine().currentState.stateKey}`, `Player in Sight: ${this.playerInSight}`, `Time Remaining: ${this.getPathFinder().getUnreachablePathTimer().getRemaining()}`];
+        
+        this.infoTexts = new Array(this.infoToShow.length);
+        for(let i = 0; i < this.infoTexts.length; i++){
+            this.infoTexts[i] = this.scene.add.text(0, 0, "", {fontSize: '24px',fill: '#ffffff'});
+        }
+    }
+
+    updateInfoTexts(){
+        this.infoToShow = [`State: ${this.getStateMachine().currentState.stateKey}`, `Player in Sight: ${this.playerInSight}`, `Time Remaining: ${this.getPathFinder().getUnreachablePathTimer().getRemaining()}`];
+        for(let i = 0; i < this.infoTexts.length; i++){
+            this.infoTexts[i].x = this.x - 60;
+            this.infoTexts[i].y = this.y - 100 + (i * 24);
+            this.infoTexts[i].text = this.infoToShow[i];
         }
     }
 
@@ -112,6 +91,13 @@ class Enemy extends Living{
             this.setDistanceToPlayer();
             this.getStateMachine().update();
             this.updateRaycaster();
+            if(this.body.onWall()){
+                this.jump();
+            }
+            if(this.showInfo){
+                this.updateInfoTexts();
+            }
+            
         }
         // console.log(this.getStateMachine().getStateHistory());
     }

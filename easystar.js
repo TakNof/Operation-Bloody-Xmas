@@ -710,10 +710,7 @@ var EasyStar = /******/ (function (modules) {
               )
                 return false;
             }
-            // Comprueba si el tile está a una altura que el personaje puede saltar
-            if (sourceNode && Math.abs(sourceNode.y - y) > Math.floor(jumpMaxHeight/64)) {
-              return false;
-            }
+            
             for (var i = 0; i < acceptableTiles.length; i++)
               if (collisionGrid[y][x] === acceptableTiles[i]) return true;
             return false;

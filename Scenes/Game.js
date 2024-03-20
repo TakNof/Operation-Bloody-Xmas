@@ -22,7 +22,13 @@ class Game extends GeneralGameScene{
             let col = [];
             for (let x = 0; x < this.map.width; x++) {
                 if(!this.collisionLayer.getTileAt(x, y) && this.collisionLayer.getTileAt(x, y+1)){
-                    col.push(0);
+                    let tileRight = this.collisionLayer.getTileAt(x+1, y+1);
+                    let tileLeft = this.collisionLayer.getTileAt(x-1, y+1);
+                    if((tileRight && !tileLeft) || (!tileRight && tileLeft) || (!tileRight && !tileLeft)){
+                        col.push(1);
+                    }else{
+                        col.push(0);
+                    }
                 }else if(this.collisionLayer.getTileAt(x, y)){
                     col.push(10);
                 }else{
@@ -64,7 +70,7 @@ class Game extends GeneralGameScene{
         // this.player.getStateMachine().printTransitions = true;
 
         this.skeletons = new EnemyGroup(this, 1, 10,  this.skeletonConfig);
-        this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
+        // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         // this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         this.player.getRaycaster().mapGameObjects(this.skeletons.getChildren(), true );

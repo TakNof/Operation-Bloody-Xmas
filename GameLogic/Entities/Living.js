@@ -223,7 +223,7 @@ class Living extends Entity{
      */
     setRaycaster() {
         this.raycaster = this.getScene().raycasterPlugin.createRaycaster({
-            debug: false
+            debug: true
         });
     
         this.raycaster.ray = this.raycaster.createRay();

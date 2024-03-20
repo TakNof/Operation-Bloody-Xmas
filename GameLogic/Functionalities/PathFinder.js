@@ -1,5 +1,5 @@
 class PathFinder{
-    constructor(scene, objectOwner, target = scene.player){
+    constructor(scene, objectOwner, target = scene.player.getPosition()){
         this.scene = scene;
         this.objectOwner = objectOwner;
         this.path;
@@ -13,7 +13,7 @@ class PathFinder{
 
         this.setEasyStar();
         this.setPathCallInterval();
-
+        this.setUnreachablePathTimer();
     }
 
     setEasyStar(){
@@ -24,11 +24,11 @@ class PathFinder{
         this.easyStar.setAcceptableTiles([0, 1, 2]);
 
         this.easyStar.enableDiagonals();
-        // this.easyStar.enableCornerCutting();
+        this.easyStar.enableCornerCutting();
 
-        this.easyStar.setTileCost(2, 20);
-        this.easyStar.setTileCost(1, 1);
-        this.easyStar.setTileCost(0, 0);
+        this.easyStar.setTileCost(2, 1000);
+        this.easyStar.setTileCost(1, 0);
+        this.easyStar.setTileCost(0, 20);
     }
 
     getEasyStar(){
@@ -40,13 +40,13 @@ class PathFinder{
             this.clearPath();
         }
 
-        console.log("Setting path");
+        // console.log("Setting path");
         
         let data = [
             Math.floor(this.objectOwner.getPositionX()/64), 
             Math.floor(this.objectOwner.getPositionY()/64),
-            this.targetLastSeenPosition ? Math.floor(this.targetLastSeenPosition.x/64): Math.floor(this.target.x/64),
-            this.targetLastSeenPosition ? Math.floor(this.targetLastSeenPosition.y/64): Math.floor(this.target.y/64),
+            Math.floor(this.target.x/64),
+            Math.floor(this.target.y/64),
         ];
         
         this.pathId = this.easyStar.findPath(...data, (path) =>{
@@ -57,10 +57,8 @@ class PathFinder{
                 this.path = path;
                 this.visualizePathMarkers();
 
-                if(!this.pathTimer){
-                    this.setUnreachablePathTimer()
-                }else{
-                    this.resetUnreachablePathTimer();
+                if(this.pathTimer.paused){
+                    this.pathTimer.paused = false;
                 }
             }
         });
@@ -69,11 +67,12 @@ class PathFinder{
 
     clearPath(){
         if(this.pathId){
+            // console.log("Clearing path")
             this.easyStar.cancelPath(this.pathId);
             this.pathId = undefined;
         }
 
-        this.removeUnreachablePathTimer();
+        // this.removeUnreachablePathTimer();
     }
 
     visualizePathMarkers(){
@@ -92,15 +91,15 @@ class PathFinder{
         this.markers = [];
     }
 
-    refreshTarget(position){
-        if(position){
+    refreshTarget(){
+        if(this.targetLastSeenPosition){
             this.targetHighPositionVariation = Phaser.Math.Distance.Between(
-                position.x,
-                position.y,
+                this.targetLastSeenPosition.x,
+                this.targetLastSeenPosition.y,
                 this.target.x,
                 this.target.y
             ) >= 64;
-            this.target = position;
+            this.target = this.targetLastSeenPosition;
         }else{
             this.targetHighPositionVariation = Phaser.Math.Distance.Between(
                 this.scene.player.getPositionX(),
@@ -108,7 +107,7 @@ class PathFinder{
                 this.target.x,
                 this.target.y
             ) >= 64;
-            this.target = this.scene.player;
+            this.target = this.scene.player.getPosition();
         }
 
         // console.log(this.targetHighPositionVariation);
@@ -118,9 +117,11 @@ class PathFinder{
         this.resetPathCallInterval();
 
         this.pathInterval = this.scene.time.addEvent({
-            delay: 1000,
+            delay: 500,
             callback: ()=>{
-                if(this.objectOwner.body.onFloor()){
+                // console.log("Calling set path method");
+                if(this.objectOwner.body.onFloor() || (this.path.length > 0 && this.objectOwner.isPointAhead(this.path[0]))){
+                    // console.log("Call success");
                     this.setPath();
                 }
             },
@@ -128,6 +129,7 @@ class PathFinder{
             loop: true
         });
         this.pathInterval.paused = true;
+        this.unableToReachTarget = false;
     }
 
     getPathCallInterval(){
@@ -142,24 +144,37 @@ class PathFinder{
 
     setUnreachablePathTimer(){
         this.pathTimer = this.scene.time.delayedCall(this.timeToCompletePath, () => {
-            this.objectOwner.getStateMachine().transitionToState("Search");
             this.unableToReachTarget = true;
-            console.log("Unreachable path");
+            // console.log("Unreachable path");
         }, [], this);
+
+        this.pathTimer.paused = true;
+    }
+
+    getUnreachablePathTimer(){
+        return this.pathTimer;
     }
 
     resetUnreachablePathTimer(){
+        console.log("reseting timer for unableToReachTarget...");
         this.pathTimer.reset({delay: this.timeToCompletePath, callback: () => {
-            this.objectOwner.getStateMachine().transitionToState("Search");
             this.unableToReachTarget = true;
-            console.log("Unreachable path");
+            // console.log("Unreachable path");
         }, callbackScope: this});
     }
 
     removeUnreachablePathTimer(){
         if(this.pathTimer){
-            this.pathTimer.remove();
+            this.pathTimer.paused = true;
+            this.resetUnreachablePathTimer();
             this.unableToReachTarget = false;
         }
+    }
+
+    reset(){
+        this.getPathCallInterval().paused = true;
+        this.setUnreachablePathTimer();
+        this.clearPath();
+        this.cleanPathMarkers();
     }
 }
