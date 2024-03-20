@@ -18,6 +18,7 @@ class Living extends Entity{
         scene.physics.add.existing(this, false);
         this.setOwnSize(config.size);
         this.setCollideWorldBounds(true);
+        this.body.onWorldBounds = true;
 
         this.setBounce(0.1);
         this.setCustomSpriteOrigin(this.config.originPosition.x, this.config.originPosition.y);
@@ -223,7 +224,7 @@ class Living extends Entity{
      */
     setRaycaster() {
         this.raycaster = this.getScene().raycasterPlugin.createRaycaster({
-            debug: true
+            debug: false
         });
     
         this.raycaster.ray = this.raycaster.createRay();

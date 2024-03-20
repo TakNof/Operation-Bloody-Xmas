@@ -12,7 +12,7 @@ class Sprite extends Phaser.Physics.Arcade.Sprite{
     constructor(scene, originInfo, spriteImgStr){
         super(scene, originInfo.x, originInfo.y, spriteImgStr);
 
-        this.originInfo = originInfo;
+        this.originInfo = originInfo;     
         this.debug = false;
         scene.add.existing(this);
     }

@@ -35,10 +35,10 @@ class Game extends GeneralGameScene{
                     col.push(2);
                 }
 
-                this.add.text(x*64 + 32, y*64 + 32, `${col[x]}`, {
-                    fontSize: '24px',
-                    fill: '#ffffff'
-                });
+                // this.add.text(x*64 + 32, y*64 + 32, `${col[x]}`, {
+                //     fontSize: '24px',
+                //     fill: '#ffffff'
+                // });
             }
             this.pathFindingGrid.push(col);
         }
@@ -63,20 +63,18 @@ class Game extends GeneralGameScene{
             this.milks.add(new Milk(this, {x: 0, y: 0}));
         }
 
-        // this.player = new Player(this, {x: canvasSize.width/2, y: canvasSize.height*4*0.46}, this.playerConfig);
-        this.player = new Player(this, {x: 700, y: 1000}, this.playerConfig);
-        // this.player.setPositionInFreeSpace();
+        this.player = new Player(this, {x: 0, y: 0}, this.playerConfig);
+        this.player.setPositionInFreeSpace();
         // this.player.setScale(0.5);
         // this.player.getStateMachine().printTransitions = true;
 
-        this.skeletons = new EnemyGroup(this, 1, 10,  this.skeletonConfig);
+        this.skeletons = new EnemyGroup(this, 5, 10,  this.skeletonConfig);
         // this.skeletons.getChildren()[0].getStateMachine().printTransitions = true;
 
         // this.player.getRaycaster().mapGameObjects(this.walls.walls.getChildren());
         this.player.getRaycaster().mapGameObjects(this.skeletons.getChildren(), true );
         this.skeletons.children.iterate((skeleton) =>{
             skeleton.getRaycaster().mapGameObjects(this.player, true);
-            skeleton.setPosition(300, 1000)
         })
 
         this.setCollidersWithTilemap(this.player, this.skeletons, this.cookies, this.milks);
@@ -95,6 +93,10 @@ class Game extends GeneralGameScene{
 
         this.roundText = this.add.text(10, 10, this.currentRound, { fontSize: '128px', fill: '#eb584d' });
         this.roundText.setScrollFactor(0);
+
+        this.physics.world.on('worldbounds', (body)=>{
+            body.gameObject.setPositionInFreeSpace();
+        })
 
     }
 

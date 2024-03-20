@@ -103,7 +103,7 @@ class GeneralGameScene extends Phaser.Scene{
             originPosition: {x: 0.5, y: 0.5},
             defaultVelocity: 100,
             velocityMultiplier: 1.5,
-            jumpVelocity: -400,
+            jumpVelocity: -450,
             maxHealth: 300,
             chaseDistance: 500,
             attackDistance: 100,

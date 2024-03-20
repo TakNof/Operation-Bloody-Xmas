@@ -8,12 +8,13 @@ class PathFinder{
         this.targetLastSeenPosition;
         this.targetHighPositionVariation = false;
         this.unableToReachTarget = false;
+        this.visualizePathMarkers = false;
         this.markers = [];
         this.timeToCompletePath = 7000;
 
         this.setEasyStar();
         this.setPathCallInterval();
-        this.setUnreachablePathTimer();
+        // this.setUnreachablePathTimer();
     }
 
     setEasyStar(){
@@ -28,7 +29,7 @@ class PathFinder{
 
         this.easyStar.setTileCost(2, 1000);
         this.easyStar.setTileCost(1, 0);
-        this.easyStar.setTileCost(0, 20);
+        this.easyStar.setTileCost(0, 400);
     }
 
     getEasyStar(){
@@ -55,11 +56,13 @@ class PathFinder{
             } else {
                 // console.warn("Path was found");
                 this.path = path;
-                this.visualizePathMarkers();
-
-                if(this.pathTimer.paused){
-                    this.pathTimer.paused = false;
+                if(this.visualizePathMarkers){
+                    this.setPathMarkers();
                 }
+
+                // if(this.pathTimer.paused){
+                //     this.pathTimer.paused = false;
+                // }
             }
         });
         this.easyStar.calculate();
@@ -75,7 +78,7 @@ class PathFinder{
         // this.removeUnreachablePathTimer();
     }
 
-    visualizePathMarkers(){
+    setPathMarkers(){
         this.cleanPathMarkers();
 
         for(let step of this.path){
@@ -120,7 +123,7 @@ class PathFinder{
             delay: 500,
             callback: ()=>{
                 // console.log("Calling set path method");
-                if(this.objectOwner.body.onFloor() || (this.path.length > 0 && this.objectOwner.isPointAhead(this.path[0]))){
+                if(this.objectOwner.body.onFloor() || (this.path && this.path.length > 0 && this.objectOwner.isPointAhead(this.path[0]))){
                     // console.log("Call success");
                     this.setPath();
                 }
@@ -172,8 +175,9 @@ class PathFinder{
     }
 
     reset(){
+        this.unableToReachTarget = false;
         this.getPathCallInterval().paused = true;
-        this.setUnreachablePathTimer();
+        // this.setUnreachablePathTimer();
         this.clearPath();
         this.cleanPathMarkers();
     }

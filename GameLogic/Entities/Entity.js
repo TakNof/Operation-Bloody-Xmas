@@ -12,8 +12,8 @@ class Entity extends Sprite{
    * 
    */
    constructor(scene, originInfo, spriteImgStr){
-       super(scene, originInfo, spriteImgStr);
-       this.name = spriteImgStr;
+        super(scene, originInfo, spriteImgStr);
+        this.name = spriteImgStr; 
    }
    
    /**

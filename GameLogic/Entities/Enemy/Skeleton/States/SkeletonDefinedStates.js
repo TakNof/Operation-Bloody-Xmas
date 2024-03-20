@@ -223,8 +223,8 @@ class SkeletonSearchState extends EnemyState{
         this.soundConfig1 = `Idle_${Phaser.Math.Between(1, 3)}`;
         this.soundConfig2 = `Walk_${Phaser.Math.Between(1, 4)}`;
         this.searchTimer = this.enemy.scene.time.delayedCall(10000, () => {
-            console.log("Unable to reach player");
-            this.enemy.getPathFinder().unableToReachTarget = false;
+            // console.log("Unable to reach player");
+            this.enemy.getPathFinder().unableToReachTarget = true;
         }, [], this);
 
         if(this.enemy.body.onFloor()){
